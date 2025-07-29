@@ -168,7 +168,7 @@
         <a class="cursor-pointer shadow-md p-5 rounded-2xl transition hover:scale-105" href="{{ route('posts.show', $other->id) }}" >
             <div class="h-[200px] rounded-2xl mb-2 bg-cover bg-center mb-5" style="background-image: url('{{ $post->media->first()?->url }}')"></div>
             <div class="my-2 mr-3 text-xs flex flex-wrap gap-1">
-            @foreach ($post->categories as $category)
+            @foreach ($other->categories as $category)
                 <span class="px-2 py-1 rounded-full text-white
                     @switch($category->category_name)
                         @case('Budgeting & Savings') bg-green-600 @break
