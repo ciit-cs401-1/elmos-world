@@ -4,10 +4,9 @@
     
 @section('content')
 
-<div class="bg-black p-10 rounded-2xl text-gray-50 min-h-100 flex flex-col-reverse">
-
-    @foreach ($featuredPosts as $post)
-        <div>
+@foreach ($featuredPosts as $post)
+<div class="relative bg-cover bg-center fill p-10 rounded-2xl text-gray-50 min-h-100 flex flex-col-reverse" style="background-image: url('{{ $post->media->first()?->url }}')">
+    <div class="relative z-1">
             <div class="text-md mb-2">Featured</div>
             <div class="text-5xl mb-1">{{$post->title}}</div>
             <div class="flex gap-5 items-center justify-center">
@@ -18,10 +17,13 @@
                     </svg>
                 </a>
             </div>
+            
         </div>
-    @endforeach
-   
+    <div class="rounded-2xl absolute  inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none"></div>
+    
 </div>
+@endforeach
+
 <div class="flex gap-10 mt-5">
     <div class="w-[70%]">
         <div class="text-2xl font-bold">Latest Posts</div>
@@ -29,7 +31,7 @@
             <div class="grid grid-cols-2 gap-7 mt-5">
                 @foreach ($latestPosts as $post)
                     <div class="cursor-pointer">
-                        <div class="bg-black h-[200px] rounded-2xl mb-2"></div>
+                        <div class="bg-cover bg-center h-[200px] rounded-2xl mb-2" style="background-image: url('{{ $post->media->first()?->url }}')"></div>
 
                            <div class="my-2 mr-3 text-xs flex flex-wrap gap-1">
                                 @foreach ($post->categories as $category)
@@ -80,12 +82,14 @@
         <div class="grid grid-cols-1 gap-2 mt-5">
 
             @foreach ($popularPosts as $post)
-                <a class="bg-black h-[200px] rounded-2xl mb-2 p-5 cursor-pointer text-white flex flex-col-reverse" href="{{ route('posts.show', $post->id) }}">
+                <a class="relative bg-cover bg-center h-[200px] rounded-2xl mb-2 p-5 cursor-pointer text-white flex flex-col-reverse" style="background-image: url('{{ $post->media->first()?->url }}')" href="{{ route('posts.show', $post->id) }}">
                     @foreach ($post->categories as $category)
-                        <div class="text-md">{{$category->category_name}}</div>
+                        <div class="text-md z-1">{{$category->category_name}}</div>
                     @endforeach
-                    <div class="text-2xl mb-1">{{$post->title}}</div>
+                    <div class="text-2xl mb-1 z-1">{{$post->title}}</div>
+                    <div class="rounded-2xl absolute  inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none"></div>
                 </a>
+                
             @endforeach
  
         </div>
