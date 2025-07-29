@@ -34,12 +34,26 @@ class Setup extends Command
             $this->warn('[STEUP]: .env failed to generate');
         }
 
-        $this->call('key:generate');
-        $this->info('[STEUP]: generated a key');
-        $this->call('migrate', ['--force' => true]);
-        $this->info('[STEUP]: migrated database');
-        $this->call('db:seed', ['--force' => true]);
-        $this->info('[STEUP]: seeded the database');
+        $this->call(command: 'key:generate');
+        $this->info(string: '[STEUP]: generated a key');
+        $this->call(command: 'migrate', arguments: ['--force' => true]);
+        $this->info(string: '[STEUP]: migrated database');
+        try {
+            $this->call(command: 'db:seed', arguments: ['--force' => true]);
+            $this->info('[SETUP]: seeded the database');
+        } catch (\Exception $e) {
+            $error_code = $e->getCode();
+            $error_message = $e->getMessage();
+
+            $this->warn("[SETUP]: db exception ( $error_code ): $error_message");
+
+            if ($error_code == "23000") {
+                $this->warn("[SETUP]: db exception is the unique constraint failed");
+            }
+
+            $this->warn("[SETUP]: skipping db seeding");
+        }
+
 
         $this->runProcess(['php', 'artisan', 'serve'], "[STEUP]: Running Laravel");
         $this->runProcess(['npm', 'run', 'dev'], "[STEUP]: Running TailwindCSS via NPM");
