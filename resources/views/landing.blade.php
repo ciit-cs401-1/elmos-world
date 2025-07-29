@@ -6,13 +6,13 @@
 
 @foreach ($featuredPosts as $post)
 <div class="relative bg-cover bg-center fill p-10 rounded-2xl text-gray-50 min-h-100 flex flex-col-reverse" style="background-image: url('{{ $post->media->first()?->url }}')">
-    <div class="relative z-1">
+    <div class="relative z-10">
             <div class="text-md mb-2">Featured</div>
             <div class="text-5xl mb-1">{{$post->title}}</div>
             <div class="flex gap-5 items-center justify-center">
                 <span class="flex-11/12">{{Str::limit($post->content,300)}}</span>
                 <a class="flex-1/12 cursor-pointer" href="{{ route('posts.show', $post->id) }}">
-                    <svg class="w-10 h-10 text-gray-600 hover:text-green-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-10 h-10 text-white hover:text-green-600 duration-200 transition ease-in-out hover:translate-x-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </a>
