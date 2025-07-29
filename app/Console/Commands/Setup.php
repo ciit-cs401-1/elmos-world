@@ -25,7 +25,6 @@ class Setup extends Command
      */
     public function handle()
     {
-        $this->runProcess(['composer', 'install'], "[STEUP]: updating composer");
         $this->runProcess(['npm', 'install'], "[STEUP]: node and vite composer");
 
         if (!file_exists(base_path('.env'))) {
@@ -41,6 +40,9 @@ class Setup extends Command
         $this->info('[STEUP]: migrated database');
         $this->call('db:seed', ['--force' => true]);
         $this->info('[STEUP]: seeded the database');
+
+        $this->runProcess(['php', 'artisan', 'serve'], "[STEUP]: Running Laravel");
+        $this->runProcess(['npm', 'run', 'dev'], "[STEUP]: Running TailwindCSS via NPM");
     }
 
     private function runProcess(array $command, string $message)
