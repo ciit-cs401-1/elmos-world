@@ -30,7 +30,7 @@
         <div>
             <div class="grid grid-cols-2 gap-7 mt-5">
                 @foreach ($latestPosts as $post)
-                    <div class="cursor-pointer">
+                    <div class="cursor-pointer shadow-md h-full rounded-3xl p-5 mb-2 transition ease-in-out hover:scale-102">
                         <div class="bg-cover bg-center h-[200px] rounded-2xl mb-2" style="background-image: url('{{ $post->media->first()?->url }}')"></div>
 
                            <div class="my-2 mr-3 text-xs flex flex-wrap gap-1">
@@ -68,7 +68,9 @@
                             </span>                    
                         </div>                    
                         <div class="text-black mb-4">{{Str::limit($post->content,150)}}</div>
-                        <a class="text-white bg-green-700 py-3 px-5 rounded-xl cursor-pointe mt-3" href="{{ route('posts.show', $post->id) }}">Read more</a>
+                        <div class="w-full mt-10 mb-2">
+                            <a class="text-white bg-green-700 py-3 px-5 rounded-xl cursor-pointer transition ease-in-out hover:bg-green-900" href="{{ route('posts.show', $post->id) }}">Read more</a>
+                        </div>
                     </div>
                 @endforeach
             </div>
@@ -82,7 +84,7 @@
         <div class="grid grid-cols-1 gap-2 mt-5">
 
             @foreach ($popularPosts as $post)
-                <a class="relative bg-cover bg-center h-[200px] rounded-2xl mb-2 p-5 cursor-pointer text-white flex flex-col-reverse" style="background-image: url('{{ $post->media->first()?->url }}')" href="{{ route('posts.show', $post->id) }}">
+                <a class="relative bg-cover bg-center h-[200px] rounded-2xl mb-2 p-5 cursor-pointer text-white flex flex-col-reverse transition ease-in-out hover:scale-102" style="background-image: url('{{ $post->media->first()?->url }}')" href="{{ route('posts.show', $post->id) }}">
                     @foreach ($post->categories as $category)
                         <div class="text-md z-1">{{$category->category_name}}</div>
                     @endforeach
