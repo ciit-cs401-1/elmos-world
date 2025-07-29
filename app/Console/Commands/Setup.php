@@ -55,8 +55,11 @@ class Setup extends Command
         }
 
 
-        $this->runProcess(['php', 'artisan', 'serve'], "[STEUP]: Running Laravel");
-        $this->runProcess(['npm', 'run', 'dev'], "[STEUP]: Running TailwindCSS via NPM");
+        $this->info('[SETUP]: Setup complete. Run the following in separate terminals:');
+        $this->info("[STEUP]: Running Laravel");
+        $this->info('  php artisan serve');
+        $this->info("[STEUP]: Running TailwindCSS via NPM");
+        $this->info('  npm run dev');
     }
 
     private function runProcess(array $command, string $message)
