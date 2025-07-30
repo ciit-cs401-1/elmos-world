@@ -6,6 +6,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Log;
+use Exception;
+
 
 class UserController extends Controller
 {
@@ -29,20 +32,28 @@ class UserController extends Controller
     /**
      * Store a newly created user.
      */
-    public function store(Request $request)
+    public function store(Request $request) // almost the same function as AuthController.store
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:30'],
+        $validateData = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', Rules\Password::defaults()],
+            'password' => ['required', 'string', 'min:8', 'confirmed']
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'registration_date' => now(),
-        ]);
+        try {
+            $user = User::create([
+                'name' => $validateData['name'],
+                'email' => $validateData['email'],
+                'password' => Hash::make($validateData['password']),
+                'registration_date' => now(),
+            ]);
+
+            $user->roles()->attach(3);
+        } catch (Exception $e) {
+            throw $e;
+        };
+
+        Log::info("RegistrationDate: THERE IS NOW NOW NOW");
 
         return redirect()->route('users.index')
             ->with('success', 'User created successfully.');

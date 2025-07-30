@@ -27,7 +27,7 @@
                     <td>{{ $user->id }}</td>
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->email }}</td>
-                    <td>{{ $user->registration_date->format('Y-m-d') }}</td>
+                    <td>{{ $user->registration_date ? $user->registration_date->format('Y-m-d') : 'N/A' }}</td>
                     <td>
                         <a href="{{ route('users.show', $user) }}" class="btn btn-info btn-sm">View</a>
                         <a href="{{ route('users.edit', $user) }}" class="btn btn-warning btn-sm">Edit</a>
