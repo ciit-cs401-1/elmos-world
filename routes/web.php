@@ -24,14 +24,14 @@ Route::prefix('dashboard')->name('dashboard.')->middleware(['auth', 'role:A,C'])
     Route::get('/', [DashboardController::class, 'index'])->name('index');
     Route::get('/posts', [DashboardController::class, 'posts'])->name('posts');
     Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
-    
+
     // Post management routes - accessible to both admins and contributors
     Route::patch('/posts/{post}/toggle-status', [DashboardController::class, 'togglePostStatus'])->name('posts.toggleStatus');
     Route::delete('/posts/{post}', [DashboardController::class, 'deletePost'])->name('posts.delete');
     Route::get('/posts/{post}', [DashboardController::class, 'showPost'])->name('posts.show');
     Route::post('/posts/bulk', [DashboardController::class, 'bulkPostActions'])->name('posts.bulk');
     Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
-    
+
     // User management routes - admin only (role 'A')
     Route::middleware('role:A')->group(function () {
         Route::get('/users', [DashboardController::class, 'users'])->name('users');
@@ -47,12 +47,12 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 Route::middleware('auth')->group(function () {
     // Available to all authenticated users
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    
+
     // Admin-only resources
     Route::middleware('role:A')->group(function () {
         Route::resource('roles', RoleController::class);
     });
-    
+
     // Admin and Contributor resources
     Route::middleware('role:A,C')->group(function () {
         Route::resource('categories', CategoryController::class);
@@ -72,3 +72,7 @@ Route::get('/db-check', function () {
         'current_posts' => \App\Models\Post::count(),
     ]);
 });
+
+use App\Http\Controllers\UserController;
+
+Route::resource('users', UserController::class)->middleware('auth');
