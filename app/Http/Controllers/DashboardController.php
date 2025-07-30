@@ -12,6 +12,7 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
@@ -83,13 +84,12 @@ class DashboardController extends Controller
         try {
             $query = Post::with(['users:id,name', 'categories:id,category_name']);
 
-            // Apply search filter
-            if ($request->filled('search')) {
-                $search = $request->get('search');
-                $query->where(function ($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                        ->orWhere('content', 'like', "%{$search}%");
-                });
+            // Apply search filter - only search in title
+            if ($request->has('search') && !empty(trim($request->input('search')))) {
+                $search = trim($request->input('search'));
+                Log::info('Posts search query:', ['search' => $search]);
+                
+                $query->where('title', 'like', "%{$search}%");
             }
 
             // Apply status filter
@@ -129,26 +129,110 @@ class DashboardController extends Controller
             }
 
             // Apply role filter
-            if ($request->filled('role')) {
-                $query->whereHas('roles', function ($q) use ($request) {
-                    $q->where('name', $request->get('role'));
+            if ($request->filled('role') && !empty($request->get('role'))) {
+                $roleId = $request->get('role');
+                // Use whereHas for more reliable filtering
+                $query->whereHas('roles', function($q) use ($roleId) {
+                    $q->where('roles.id', $roleId);
                 });
             }
+            
+            // Apply status filter if provided
+            if ($request->filled('status')) {
+                $status = $request->get('status');
+                $query->where('status', $status);
+            }
 
-            // Apply sorting
-            $sortBy = $request->get('sort', 'created_at');
-            $sortOrder = $request->get('order', 'desc');
+            // Apply sorting - handle the field|direction format from the form
+            $sort = $request->get('sort', 'registration_date|desc');
+            $sortParts = explode('|', $sort);
+            $sortBy = $sortParts[0] ?? 'registration_date';
+            $sortOrder = $sortParts[1] ?? 'desc';
             $query->orderBy($sortBy, $sortOrder);
 
+            // Apply pagination consistently
             $users = $query->paginate(10)->withQueryString();
 
             // Get roles for filter dropdown
             $roles = Role::select('id', 'role_name')->orderBy('role_name')->get();
 
+            // For debugging - log simple message
+            if ($request->filled('role') && !empty($request->get('role'))) {
+                Log::info('Role filter applied: ' . $request->get('role'));
+            }
+
             return view('dashboard.users', compact('users', 'roles'));
         } catch (\Exception $e) {
             Log::error('Dashboard users error: ' . $e->getMessage());
-            return view('dashboard.users')->with('error', 'Failed to load users data.');
+            return view('dashboard.users', ['error' => 'An error occurred while loading users: ' . $e->getMessage()]);
+        }
+    }
+    
+    /**
+     * Store a new user
+     */
+    public function storeUser(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:30',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|min:6|confirmed',
+                'roles' => ['required', 'array', 'min:1'],
+                'roles.*' => ['required', 'exists:roles,id']
+            ]);
+            
+            $user = DB::transaction(function() use ($request) {
+                $user = User::create([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'registration_date' => now(),
+                ]);
+                
+                // Only allow Admin (A) and Contributor (C) roles
+                $allowedRoles = Role::whereIn('role_name', ['A', 'C'])
+                    ->whereIn('id', $request->roles)
+                    ->pluck('id');
+                
+                // Attach selected roles
+                $user->roles()->attach($allowedRoles);
+                
+                return $user;
+            });
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'User created successfully',
+                    'user' => $user->load('roles')
+                ]);
+            }
+            
+            return redirect()->route('dashboard.users')
+                ->with('success', 'User created successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Create user error: ' . $e->getMessage());
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create user. Please try again.'
+                ], 500);
+            }
+            
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to create user. Please try again.');
         }
     }
 
@@ -189,6 +273,29 @@ class DashboardController extends Controller
     /**
      * Delete a user
      */
+    /**
+     * Update a user's role
+     */
+    public function updateUserRole(Request $request, User $user): RedirectResponse
+    {
+        try {
+            $request->validate([
+                'role_id' => 'required|exists:roles,id',
+            ]);
+            
+            // Clear existing roles and assign the new role
+            $user->roles()->sync([$request->role_id]);
+            
+            return redirect()->back()->with('success', "Role updated successfully for {$user->name}.");
+        } catch (\Exception $e) {
+            Log::error('Update user role error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update user role. Please try again.');
+        }
+    }
+
+    /**
+     * Delete a user
+     */
     public function deleteUser(User $user): RedirectResponse
     {
         try {
@@ -199,34 +306,49 @@ class DashboardController extends Controller
 
             $name = $user->name;
 
-            // Delete user's posts or reassign them
-            $userPosts = $user->posts();
-            if ($userPosts->count() > 0) {
-                // Option 1: Delete posts
-                $userPosts->delete();
-
-                // Option 2: Reassign to admin (uncomment if preferred)
-                // $adminUser = User::whereHas('roles', function($q) {
-                //     $q->where('name', 'admin');
-                // })->first();
-                // if ($adminUser) {
-                //     $userPosts->update(['user_id' => $adminUser->id]);
-                // }
-            }
-
-            // Delete user's comments
-            $user->comments()->delete();
-
-            // Detach roles
-            $user->roles()->detach();
-
-            // Delete the user
-            $user->delete();
+            // Use DB transaction to ensure all operations complete or none do
+            DB::transaction(function() use ($user) {
+                // Get user's posts first
+                $posts = $user->posts()->get();
+                
+                // Clean up each post's relationships before deletion
+                foreach ($posts as $post) {
+                    // Delete media associated with this post
+                    // First find media related to this post
+                    $mediaRecords = DB::table('media')->where('post_id', $post->id)->get();
+                    
+                    // Delete each media record
+                    foreach ($mediaRecords as $media) {
+                        DB::table('media')->where('id', $media->id)->delete();
+                    }
+                    
+                    // Detach categories
+                    $post->categories()->detach();
+                    
+                    // Detach tags
+                    $post->tags()->detach();
+                    
+                    // Delete comments on this post
+                    $post->comments()->delete();
+                    
+                    // Now delete the post
+                    $post->delete();
+                }
+                
+                // Delete user's comments on other posts
+                $user->comments()->delete();
+                
+                // Detach roles
+                $user->roles()->detach();
+                
+                // Delete the user
+                $user->delete();
+            });
 
             return redirect()->back()->with('success', "User '{$name}' has been deleted successfully.");
         } catch (\Exception $e) {
-            Log::error('Delete user error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to delete user. Please try again.');
+            Log::error('Delete user error: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
+            return redirect()->back()->with('error', 'Failed to delete user. Error: ' . $e->getMessage());
         }
     }
 

@@ -312,16 +312,15 @@ class PostController extends Controller
 
         Log::info("Post.update: Is it owner of post?", [$isOwnerOfPost]);
 
+        // Step 6: Checking if the properties were changed
+        $is_post_title_changed = false;
+        $is_post_content_changed = false;
+        $is_post_featured_image_url_changed = false;
+        $is_post_categories_changed = false;
+        $is_post_tags_changed = false;
 
 
         if ($isOwnerOfPost || $admin) {
-
-            // Step 6: Checking if the properties were changed
-            $is_post_title_changed = false;
-            $is_post_content_changed = false;
-            $is_post_featured_image_url_changed = false;
-            $is_post_categories_changed = false;
-            $is_post_tags_changed = false;
 
             try {
                 $is_post_title_changed = $post->title !== $validated_request_items["post_title"];
@@ -402,11 +401,11 @@ class PostController extends Controller
             };
 
             if ($is_there_any_changes) {
-                Log::info("Post.update: NOTHING was changed");
-            } else {
                 Log::info("Post.update: some properties of th post was changed");
                 Log::info("Post.update: proceeding to save changed to post");
                 $post->save();
+            } else {
+                Log::info("Post.update: NOTHING was changed");
             };
 
             return redirect()->route('dashboard.posts.show', $post->id)->with('success', 'successfully saved post.');

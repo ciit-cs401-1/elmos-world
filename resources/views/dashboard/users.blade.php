@@ -2,19 +2,23 @@
 
 @section('content')
 <div class="p-6">
-    <!-- Page Header -->
-    <x-dashboard.main.page-header 
-        title="Users Management" 
-        subtitle="Manage user accounts, roles, and permissions." 
-        icon="users" 
-    />
+    <div>
+        <!-- Page Header -->
+        <x-dashboard.main.page-header 
+            title="Users Management" 
+            subtitle="Manage user accounts, roles, and permissions." 
+            icon="users" 
+        />
 
-    <!-- Users Content -->
-    <x-dashboard.users.content 
-        :users="$users ?? collect()"
-        :roles="$roles ?? collect()"
-        :currentRole="request('role')"
-        :currentStatus="request('status')"
-    />
+        <!-- Users Content -->
+        <div id="cont-tab">
+            <x-dashboard.users.content 
+                :users="$users ?? collect()"
+                :roles="$roles ?? collect()"
+                :currentRole="request()->query('role')"
+                :searchQuery="request()->query('search')"
+            />
+        </div>
+    </div>
 </div>
 @endsection

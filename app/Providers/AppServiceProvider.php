@@ -19,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Apply PHP settings from environment variables
+        if ($maxExecutionTime = env('MAX_EXECUTION_TIME')) {
+            ini_set('max_execution_time', $maxExecutionTime);
+        }
     }
 }

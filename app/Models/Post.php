@@ -15,8 +15,11 @@ class Post extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'title',
+        'content',
         'status',
-        'publication_date'
+        'publication_date',
+        'featured_image_url',
     ];
 
     public function categories(): BelongsToMany

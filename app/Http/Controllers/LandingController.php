@@ -10,21 +10,31 @@ class LandingController extends Controller
 {
     public function index()
     {
-
-        $featuredPosts = Post::where('featured_post', 1)
+        // Set higher execution time limit for this request
+        ini_set('max_execution_time', 300);
+        
+        $featuredPosts = Post::select(['id', 'title', 'content', 'publication_date', 'views_count', 'featured_post', 'user_id'])
+            ->with(['users:id,name', 'categories:id,category_name'])
+            ->where('featured_post', 1)
             ->orderBy('publication_date', 'desc')
             ->get();
 
-        $latestPosts = Post::where('publication_date', '!=', null)
+        $latestPosts = Post::select(['id', 'title', 'content', 'publication_date', 'views_count', 'user_id'])
+            ->with(['users:id,name', 'categories:id,category_name'])
+            ->whereNotNull('publication_date')
             ->orderBy('publication_date', 'desc')
             ->paginate(10);
 
-        $popularPosts = Post::where('publication_date', '!=', null)
+        $popularPosts = Post::select(['id', 'title', 'content', 'publication_date', 'views_count', 'user_id'])
+            ->with(['users:id,name', 'categories:id,category_name'])
+            ->whereNotNull('publication_date')
             ->orderBy('views_count', 'desc')
-            ->take(10)  // top 10
+            ->take(10)
             ->get();
 
-        $categories = Category::all();
+        $categories = cache()->remember('all_categories', 60 * 24, function() {
+            return Category::all();
+        });
 
         return view(
             'landing',

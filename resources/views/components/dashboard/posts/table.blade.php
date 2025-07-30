@@ -39,7 +39,7 @@ function updateStatus(postId, status) {
     <thead class="bg-gray-50">
         <tr>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <input type="checkbox" class="rounded border-gray-300">
+                ID
             </th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Title
@@ -66,7 +66,7 @@ function updateStatus(postId, status) {
             @foreach($posts as $post)
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <input type="checkbox" class="rounded border-gray-300" value="{{ $post->id }}">
+                        <span class="text-sm font-medium text-gray-900">{{ $post->id }}</span>
                     </td>
                     <td class="px-6 py-4">
                         <div class="text-sm font-medium text-gray-900">
