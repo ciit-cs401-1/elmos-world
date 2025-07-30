@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
@@ -24,32 +23,26 @@ class UserController extends Controller
      */
     public function create()
     {
-        $roles = Role::all();
-        return view('users.create', compact('roles'));
+        return view('users.create');
     }
 
     /**
-     * Store a newly created user in storage.
+     * Store a newly created user.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:30'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'roles' => ['nullable', 'array'],
-            'roles.*' => ['exists:roles,id'],
+            'password' => ['required', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'registration_date' => now(),
         ]);
-
-        if ($request->has('roles')) {
-            $user->roles()->sync($request->roles);
-        }
 
         return redirect()->route('users.index')
             ->with('success', 'User created successfully.');
@@ -68,21 +61,18 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $roles = Role::all();
-        return view('users.edit', compact('user', 'roles'));
+        return view('users.edit', compact('user'));
     }
 
     /**
-     * Update the specified user in storage.
+     * Update the specified user.
      */
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:30'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
-            'roles' => ['nullable', 'array'],
-            'roles.*' => ['exists:roles,id'],
+            'password' => ['nullable', Rules\Password::defaults()],
         ]);
 
         $data = [
@@ -96,14 +86,12 @@ class UserController extends Controller
 
         $user->update($data);
 
-        $user->roles()->sync($request->roles ?? []);
-
         return redirect()->route('users.index')
             ->with('success', 'User updated successfully.');
     }
 
     /**
-     * Remove the specified user from storage.
+     * Remove the specified user.
      */
     public function destroy(User $user)
     {
