@@ -24,34 +24,58 @@ class DashboardController extends Controller
     {
         try {
             // Get dashboard statistics
-            $stats = [
-                'total_posts' => Post::count(),
-                'published_posts' => Post::where('status', 'P')->count(),
-                'draft_posts' => Post::where('status', 'D')->count(),
-                'total_users' => User::count(),
-                'total_subscribers' => User::whereHas('roles', function ($query) {
-                    $query->where('role_name', 'subscriber');
-                })->count(),
-                'total_contributors' => User::whereHas('roles', function ($query) {
-                    $query->whereIn('role_name', ['author', 'editor', 'admin']);
-                })->count(),
-                'total_comments' => Comment::count(),
-                'pending_comments' => Comment::where('status', 'pending')->count(),
-            ];
 
-            // Get recent posts with author information
-            $recentPosts = Post::with(['users:id,name', 'categories:id,category_name'])
-                ->select('id', 'title', 'content', 'status', 'created_at', 'updated_at', 'views_count')
-                ->orderBy('created_at', 'desc')
-                ->limit(5)
-                ->get();
+            $stats = [];
 
-            // Get recent users with roles
-            $recentUsers = User::with(['roles:id,role_name'])
-                ->select('id', 'name', 'email', 'profile_photo', 'created_at', 'updated_at')
-                ->orderBy('created_at', 'desc')
-                ->limit(5)
-                ->get();
+            if (auth()->user()->roles->contains('id', 1)) {
+
+                $stats = [
+                    'total_posts' => Post::count(),
+                    'published_posts' => Post::where('status', 'P')->count(),
+                    'draft_posts' => Post::where('status', 'D')->count(),
+                    'total_users' => User::count(),
+                    'total_subscribers' => User::whereHas('roles', function ($query) {
+                        $query->where('role_name', 'subscriber');
+                    })->count(),
+                    'total_contributors' => User::whereHas('roles', function ($query) {
+                        $query->whereIn('role_name', ['author', 'editor', 'admin']);
+                    })->count(),
+                    'total_comments' => Comment::count(),
+                    'pending_comments' => Comment::where('status', 'pending')->count(),
+                ];
+
+                // Get recent posts with author information
+                $recentPosts = Post::with(['users:id,name', 'categories:id,category_name'])
+                    ->select('id', 'title', 'content', 'status', 'created_at', 'updated_at', 'views_count')
+                    ->orderBy('created_at', 'desc')
+                    ->limit(5)
+                    ->get();
+
+                // Get recent users with roles
+                $recentUsers = User::with(['roles:id,role_name'])
+                    ->select('id', 'name', 'email', 'profile_photo', 'created_at', 'updated_at')
+                    ->orderBy('created_at', 'desc')
+                    ->limit(5)
+                    ->get();
+            };
+
+            if (auth()->user()->roles->contains('id', 2)) {
+                $contributor = Post::where('user_id', auth()->id());
+                $stats = [
+                    'total_posts' => $contributor->count(),
+                    'published_posts' => $contributor->where('status', 'P')->count(),
+                    'draft_posts' => $contributor->where('status', 'D')->count(),
+                    'total_comments' => $contributor->count(),
+                    'pending_comments' => $contributor->where('status', 'pending')->count(),
+                ];
+
+                // Get recent posts with author information
+                $recentPosts = $contributor->with(['users:id,name', 'categories:id,category_name'])
+                    ->select('id', 'title', 'content', 'status', 'created_at', 'updated_at', 'views_count')
+                    ->orderBy('created_at', 'desc')
+                    ->limit(5)
+                    ->get();
+            };
 
             return view('dashboard.index', compact('stats', 'recentPosts', 'recentUsers'));
         } catch (\Exception $e) {
@@ -88,7 +112,7 @@ class DashboardController extends Controller
             if ($request->has('search') && !empty(trim($request->input('search')))) {
                 $search = trim($request->input('search'));
                 Log::info('Posts search query:', ['search' => $search]);
-                
+
                 $query->where('title', 'like', "%{$search}%");
             }
 
@@ -100,9 +124,22 @@ class DashboardController extends Controller
             // Apply sorting
             $sortBy = $request->get('sort', 'created_at');
             $sortOrder = $request->get('order', 'desc');
-            $query->orderBy($sortBy, $sortOrder);
 
-            $posts = $query->paginate(10)->withQueryString();
+            if (auth()->user()->roles->contains('id', 1)) {
+                $query->orderBy($sortBy, $sortOrder);
+
+                $posts = $query->paginate(10)->withQueryString();
+            };
+
+            if (auth()->user()->roles->contains('id', 2)) {
+                $query->orderBy($sortBy, $sortOrder)
+                    ->where('user_id', auth()->id())
+                    ->firstOrFail();
+
+                $posts = $query->paginate(10)->withQueryString();
+            };
+
+
 
             return view('dashboard.posts', compact('posts'));
         } catch (\Exception $e) {
@@ -132,11 +169,11 @@ class DashboardController extends Controller
             if ($request->filled('role') && !empty($request->get('role'))) {
                 $roleId = $request->get('role');
                 // Use whereHas for more reliable filtering
-                $query->whereHas('roles', function($q) use ($roleId) {
+                $query->whereHas('roles', function ($q) use ($roleId) {
                     $q->where('roles.id', $roleId);
                 });
             }
-            
+
             // Apply status filter if provided
             if ($request->filled('status')) {
                 $status = $request->get('status');
@@ -167,7 +204,7 @@ class DashboardController extends Controller
             return view('dashboard.users', ['error' => 'An error occurred while loading users: ' . $e->getMessage()]);
         }
     }
-    
+
     /**
      * Store a new user
      */
@@ -181,26 +218,26 @@ class DashboardController extends Controller
                 'roles' => ['required', 'array', 'min:1'],
                 'roles.*' => ['required', 'exists:roles,id']
             ]);
-            
-            $user = DB::transaction(function() use ($request) {
+
+            $user = DB::transaction(function () use ($request) {
                 $user = User::create([
                     'name' => $request->name,
                     'email' => $request->email,
                     'password' => Hash::make($request->password),
                     'registration_date' => now(),
                 ]);
-                
+
                 // Only allow Admin (A) and Contributor (C) roles
                 $allowedRoles = Role::whereIn('role_name', ['A', 'C'])
                     ->whereIn('id', $request->roles)
                     ->pluck('id');
-                
+
                 // Attach selected roles
                 $user->roles()->attach($allowedRoles);
-                
+
                 return $user;
             });
-            
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
@@ -208,7 +245,7 @@ class DashboardController extends Controller
                     'user' => $user->load('roles')
                 ]);
             }
-            
+
             return redirect()->route('dashboard.users')
                 ->with('success', 'User created successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -222,14 +259,14 @@ class DashboardController extends Controller
             throw $e;
         } catch (\Exception $e) {
             Log::error('Create user error: ' . $e->getMessage());
-            
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to create user. Please try again.'
                 ], 500);
             }
-            
+
             return back()
                 ->withInput()
                 ->with('error', 'Failed to create user. Please try again.');
@@ -282,10 +319,10 @@ class DashboardController extends Controller
             $request->validate([
                 'role_id' => 'required|exists:roles,id',
             ]);
-            
+
             // Clear existing roles and assign the new role
             $user->roles()->sync([$request->role_id]);
-            
+
             return redirect()->back()->with('success', "Role updated successfully for {$user->name}.");
         } catch (\Exception $e) {
             Log::error('Update user role error: ' . $e->getMessage());
@@ -307,40 +344,40 @@ class DashboardController extends Controller
             $name = $user->name;
 
             // Use DB transaction to ensure all operations complete or none do
-            DB::transaction(function() use ($user) {
+            DB::transaction(function () use ($user) {
                 // Get user's posts first
                 $posts = $user->posts()->get();
-                
+
                 // Clean up each post's relationships before deletion
                 foreach ($posts as $post) {
                     // Delete media associated with this post
                     // First find media related to this post
                     $mediaRecords = DB::table('media')->where('post_id', $post->id)->get();
-                    
+
                     // Delete each media record
                     foreach ($mediaRecords as $media) {
                         DB::table('media')->where('id', $media->id)->delete();
                     }
-                    
+
                     // Detach categories
                     $post->categories()->detach();
-                    
+
                     // Detach tags
                     $post->tags()->detach();
-                    
+
                     // Delete comments on this post
                     $post->comments()->delete();
-                    
+
                     // Now delete the post
                     $post->delete();
                 }
-                
+
                 // Delete user's comments on other posts
                 $user->comments()->delete();
-                
+
                 // Detach roles
                 $user->roles()->detach();
-                
+
                 // Delete the user
                 $user->delete();
             });

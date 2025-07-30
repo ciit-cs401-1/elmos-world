@@ -19,9 +19,16 @@
     />
 
     <!-- Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    @admin
+    <div class="grid grid-cols-1 lg:grid-cols-auto gap-6">
+    @endadmin
+    @role('C')
+    <div class="grid grid-cols-1 gap-6">
+    @endrole
         <x-dashboard.main.recent-posts :posts="$recentPosts ?? collect()" viewAllUrl="{{ route('dashboard.posts') }}" />
+        @admin
         <x-dashboard.main.recent-users :users="$recentUsers ?? collect()" viewAllUrl="{{ route('dashboard.users') }}" />
+        @endadmin   
     </div>
 </div>
 @endsection

@@ -32,7 +32,14 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-gray-900">Think Finance!</h1>
+
+                        @admin
                         <p class="text-sm text-gray-500">Admin Dashboard</p>
+                        @endadmin
+
+                        @role('C')
+                        <p class="text-sm text-gray-500">Contributor Dashboard</p>
+                        @endadmin
                     </div>
                 </div>
             </div>
@@ -53,6 +60,7 @@
                     <span class="font-medium">Posts Management</span>
                 </a>
 
+                @admin
                 <a href="{{ route('dashboard.users') }}" 
                    class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('dashboard.users') ? 'text-white' : 'text-gray-700 hover:bg-gray-100' }}"
                    style="{{ request()->routeIs('dashboard.users') ? 'background-color: #008236;' : '' }}">
@@ -72,6 +80,14 @@
                    style="{{ request()->routeIs('categories.index') ? 'background-color: #008236;' : '' }}">
                     <x-heroicon-m-paper-clip class="w-5 h-5" />
                     <span class="font-medium">Category List</span>
+                </a>
+                @endadmin
+
+                <a href="{{ route('dashboard.account.show') }}" 
+                   class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('account.show') ? 'text-white' : 'text-gray-700 hover:bg-gray-100' }}"
+                   style="{{ request()->routeIs('account.show') ? 'background-color: #008236;' : '' }}">
+                    <x-heroicon-c-user-circle class="w-5 h-5" />
+                    <span class="font-medium">Account</span>
                 </a>
 
                 <a href="{{ route('home') }}" 
@@ -94,7 +110,14 @@
                             <p class="text-sm font-medium text-gray-900 truncate">
                                 {{ auth()->user()->name ?? 'Admin User' }}
                             </p>
+
+                            @admin
                             <p class="text-xs text-gray-500 truncate">Administrator</p>
+                            @endadmin
+
+                            @role('C')
+                            <p class="text-xs text-gray-500 truncate">Contributor</p>
+                            @endadmin
                         </div>
                     </div>
                     

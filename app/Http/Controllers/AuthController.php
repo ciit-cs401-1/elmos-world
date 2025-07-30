@@ -72,4 +72,10 @@ class AuthController extends Controller
 
         return redirect('/');
     }
+
+    public function show()
+    {
+        $user = User::findOrFail(auth()->id());
+        return view('dashboard.account', ['user' => $user]);
+    }
 }

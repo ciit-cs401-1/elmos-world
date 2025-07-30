@@ -19,6 +19,12 @@ class UserSeeder extends Seeder
             'password' => 'password123',
         ]);
 
+        User::factory()->create([
+            'name' => 'Marie Doe',
+            'email' => 'contributor@test.com',
+            'password' => 'password123',
+        ]);
+
         User::factory(100)->create();
     }
 }

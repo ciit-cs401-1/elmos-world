@@ -24,6 +24,7 @@
     </div>
 
     <!-- Total Users Card -->
+    @admin
     <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
         <div class="flex items-center">
             <div class="p-3 rounded-lg" style="background-color: rgb(219, 234, 254);">
@@ -52,6 +53,7 @@
             </div>
         </div>
     </div>
+    @endadmin
 
     <!-- Total Comments Card -->
     <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
