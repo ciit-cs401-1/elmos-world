@@ -4,17 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Media extends Model
 {
-
     use HasFactory;
 
     public $timestamps = false;
 
-    public function posts(): BelongsToMany
+    public function post(): BelongsTo
     {
-        return $this->belongsToMany(Post::class);
+        return $this->belongsTo(Post::class);
     }
 }
