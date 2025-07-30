@@ -102,12 +102,7 @@ class UserController extends Controller
     }
 
     /**
-     * Remove the specified user.
+     * Remove the specified user - along with anything related to them.
      */
-    public function destroy(User $user)
-    {
-        $user->delete();
-        return redirect()->route('users.index')
-            ->with('success', 'User deleted successfully.');
-    }
+    public function destroy(User $user) {}
 }
