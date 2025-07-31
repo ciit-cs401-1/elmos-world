@@ -149,9 +149,13 @@ function updateStatus(postId, status) {
         @endif
     </tbody>
 </table>
+
+@if($posts->count())
 <div class="px-10 pb-5 mt-3">
     {{ $posts->links() }}
 </div>
+@endif
+
 
 
 

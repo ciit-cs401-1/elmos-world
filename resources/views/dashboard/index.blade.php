@@ -11,10 +11,14 @@
     <!-- Statistics Grid -->
     <x-dashboard.main.stats-grid 
         :stats="[
-            'total_posts' => $stats['total_posts'] ?? 0,
+            'total_posts' => $stats['total_posts'],
             'total_users' => $stats['total_users'] ?? 0,
             'total_comments' => $stats['total_comments'] ?? 0,
-            'total_contributors' => $stats['total_contributors'] ?? 0
+            'total_contributors' => $stats['total_contributors'] ?? 0,
+            'total_drafts' => $stats['total_drafts'] ?? 0,
+            'total_published' => $stats['total_published'] ?? 0,
+            'total_inactive' => $stats['total_inactive'] ?? 0
+
         ]"
     />
 

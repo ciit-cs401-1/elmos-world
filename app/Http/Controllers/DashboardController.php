@@ -27,6 +27,9 @@ class DashboardController extends Controller
 
             $stats = [];
 
+            $recentUsers = collect();
+            $recentPosts = collect();
+
             if (auth()->user()->roles->contains('id', 1)) {
 
                 $stats = [
@@ -57,16 +60,17 @@ class DashboardController extends Controller
                     ->orderBy('created_at', 'desc')
                     ->limit(5)
                     ->get();
-            };
-
-            if (auth()->user()->roles->contains('id', 2)) {
+            } else {
                 $contributor = Post::where('user_id', auth()->id());
                 $stats = [
-                    'total_posts' => $contributor->count(),
-                    'published_posts' => $contributor->where('status', 'P')->count(),
-                    'draft_posts' => $contributor->where('status', 'D')->count(),
-                    'total_comments' => $contributor->count(),
-                    'pending_comments' => $contributor->where('status', 'pending')->count(),
+                    'total_posts' => (clone $contributor)->count(),
+                    'published_posts' => (clone $contributor)->where('status', 'P')->count(),
+                    'draft_posts' => (clone $contributor)->where('status', 'D')->count(),
+                    'total_comments' => (clone $contributor)->count(),
+                    'total_drafts' => (clone $contributor)->where('status', 'D')->count(),
+                    'total_published' => (clone $contributor)->where('status', 'P')->count(),
+                    'total_inactive' => (clone $contributor)->where('status', 'I')->count(),
+
                 ];
 
                 // Get recent posts with author information
@@ -75,7 +79,7 @@ class DashboardController extends Controller
                     ->orderBy('created_at', 'desc')
                     ->limit(5)
                     ->get();
-            };
+            }
 
             return view('dashboard.index', compact('stats', 'recentPosts', 'recentUsers'));
         } catch (\Exception $e) {

@@ -55,18 +55,48 @@
     </div>
     @endadmin
 
-    <!-- Total Comments Card -->
+   
+    @role('C')
     <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
         <div class="flex items-center">
-            <div class="p-3 rounded-lg" style="background-color: rgb(255, 237, 213);">
+            <div class="p-3 rounded-lg" style="background-color: rgb(255, 244, 213);">
                 <svg class="w-6 h-6" style="color: rgb(234, 88, 12);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                 </svg>
             </div>
             <div class="ml-4">
-                <p class="text-sm font-medium text-gray-600">Total Comments</p>
-                <p class="text-2xl font-semibold text-gray-900">{{ number_format($stats['total_comments'] ?? 0) }}</p>
+                <p class="text-sm font-medium text-gray-600">Drafts</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ number_format($stats['total_drafts'] ?? 0) }}</p>
             </div>
         </div>
     </div>
+
+    <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center">
+            <div class="p-3 rounded-lg" style="background-color: rgb(233, 255, 213);">
+                <svg class="w-6 h-6" style="color: rgb(40, 115, 47);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Published</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ number_format($stats['total_published'] ?? 0) }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center">
+            <div class="p-3 rounded-lg" style="background-color: rgb(255, 213, 213);">
+                <svg class="w-6 h-6" style="color: rgb(163, 29, 29);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Inactive</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ number_format($stats['total_inactive'] ?? 0) }}</p>
+            </div>
+        </div>
+    </div>
+    @endrole
 </div>
