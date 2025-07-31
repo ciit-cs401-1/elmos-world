@@ -20,7 +20,8 @@ app:setup is automating all .env key generate migrate and seed
     npm run dev
     ```
 - If you are using Windows, to run npm
-    ```Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned```
+  ```Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+  ```
 
 2. Laravel Debug:
     ```bash
