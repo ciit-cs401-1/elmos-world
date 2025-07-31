@@ -1,49 +1,41 @@
-#IMAGE
+# IMAGE
 FROM php:8.2-apache
 
-#DEPENDENCIES
-RUN apt-get update && apt-get install -y\
-git \
-unzip \
-libzip-dev \
-libpng-dev \
-libonig-dev \
-libxml2-dev \
-zip \
-curl \
-&& docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
+# DEPENDENCIES
+RUN apt-get update && apt-get install -y \
+    git unzip libzip-dev libpng-dev libonig-dev libxml2-dev zip curl \
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
 
-#COMPOSER
-COPY --from=composer:2.7 /usr/bin/composer /usr/bin/COMPOSER
+# COMPOSER
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
-#WORKING
-WORKDIR /var/www/hmtl
+# WORKING DIRECTORY
+WORKDIR /var/www/html
 
-#PROJECT FILE
+# PROJECT FILES
 COPY . /var/www/html
 
-#PERMISSIONS
+# PERMISSIONS
 RUN chown -R www-data:www-data /var/www/html \
-&& chdwon -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-#APACHE
+# APACHE CONFIG
 RUN a2enmod rewrite
 
-#PORT 80
+# PORT
 EXPOSE 80
 
-#ENVIRONMENT
+# ENVIRONMENT
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
-#CONFIG
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*conf
+# CONFIGURE APACHE ROOT
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 
-#LARAVEL
+# LARAVEL DEPENDENCIES
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
-#ENV
-RUN if [! -f .env]; then cp .env.example .env; fi
+# CREATE .env IF MISSING
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
-#START
+# START APACHE
 CMD ["apache2-foreground"]
-
