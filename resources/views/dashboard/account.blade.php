@@ -30,7 +30,9 @@
 
             <!-- Body -->
             <div class="p-6 bg-white rounded-b-lg shadow-sm border border-gray-100">
-                <form class="grid grid-cols-2 gap-y-5">
+                <form action="{{ route('users.update', $user) }}" method="POST" class="grid grid-cols-2 gap-y-5">
+                    @csrf
+                    @method('PUT')
                     <div class="font-semibold">Name:</div>
                     <input x-show="editProfile" name="name" type="text" value="{{ $user->name }}"
                         class="w-full h-10 p-4 mb-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
@@ -73,16 +75,31 @@
             </div>
 
             <!-- Body -->
-            <form class="p-6 bg-white rounded-b-lg shadow-sm border border-gray-100" x-show="editPassword">
-                <input name="password" type="password" placeholder="New Password"
+            <form action="{{ route('users.update', $user) }}" method="POST" class="p-6 bg-white rounded-b-lg shadow-sm border border-gray-100" x-show="editPassword">
+                @csrf
+                @method('PUT')
+                    <input name="password" type="password" placeholder="New Password"
                     class="w-full h-10 p-4 mb-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                <input name="confirm_password" type="password" placeholder="Confirm Password"
+                    <input type="text" class="form-control hidden" id="name" name="name" value="{{$user->name}}">
+                    <input type="text" class="form-control hidden" id="email" name="email" value="{{$user->email}}">
+
+                    <input name="confirm_password" type="password" placeholder="Confirm Password"
                     class="w-full h-10 p-4 mb-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                 <div class="col-span-2 col-start-1 flex justify-end">
                     <button class="px-10 py-3 mt-5 bg-green-800 text-white rounded-2xl">
                         Save
                     </button>
                 </div>
+            </form>
+        </div>
+
+        <div class="flex justify-end">
+            <form action="{{ route('users.destroy', $user) }}" method="POST">
+                 @csrf
+                @method('DELETE')
+                <button onclick="return confirm('Are you sure you want to delete your account?')" class="px-10 py-3 mt-5 bg-red-800 text-white rounded-2xl cursor-pointer">
+                    Delete Account
+                </button>
             </form>
         </div>
     </div>

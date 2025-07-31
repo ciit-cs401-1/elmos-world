@@ -131,6 +131,9 @@
                         Update
                     </button>
                 </div>
+
+
+                @extends('layouts.master')
         </form>
     </div>
 </div>

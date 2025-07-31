@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -97,8 +98,7 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('users.index')
-            ->with('success', 'User updated successfully.');
+        return redirect()->back()->with('success', 'User updated successfully.');
     }
 
     /**
@@ -106,8 +106,20 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        $posts = Post::where('user_id', $user->id)->get();
+
+        foreach ($posts as $post) {
+            $post->comments()->delete();
+            $post->media()->delete();
+            $post->tags()->detach();
+            $post->categories()->detach();
+            $post->delete();
+        }
+
+        $user->comments()->delete();
+        $user->roles()->detach();
         $user->delete();
-        return redirect()->route('users.index')
+        return redirect()->route('landing')
             ->with('success', 'User deleted successfully.');
     }
 }
