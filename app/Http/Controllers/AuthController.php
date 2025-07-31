@@ -32,11 +32,17 @@ class AuthController extends Controller
 
         if (Auth::attempt($validateData, $request->boolean('remember'))) {
             $request->session()->regenerate();
+
+            // Update last login date
+            $user = Auth::user();
+            $user->last_login_date = now();
+            $user->save();
+
             return redirect()->intended('/');
         }
 
         throw ValidationException::withMessages([
-            'email' => 'Credentials does not match!'
+            'email' => 'Credentials do not match!'
         ]);
     }
 
@@ -61,6 +67,7 @@ class AuthController extends Controller
                 'name' => $validateData['name'],
                 'email' => $validateData['email'],
                 'password' => Hash::make($validateData['password']),
+                'registration_date' => now(),
             ]);
 
             $user->roles()->attach(3);

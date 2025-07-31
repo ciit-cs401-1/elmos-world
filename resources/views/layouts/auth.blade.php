@@ -19,6 +19,6 @@
         'resources/js/app.js']) @else @endif
     </head>
     <body class="bg-green-700 h-screen flex items-center justify-center">
-        <main class="container w-[35%]">@yield('content')</main>
+        <main class="container md:w-[35%] w-full">@yield('content')</main>
     </body>
 </html>

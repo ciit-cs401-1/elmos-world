@@ -75,3 +75,7 @@ Route::get('/db-check', function () {
         'current_posts' => \App\Models\Post::count(),
     ]);
 });
+
+use App\Http\Controllers\UserController;
+
+Route::resource('users', UserController::class)->middleware('auth');
