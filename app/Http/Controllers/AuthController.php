@@ -83,6 +83,11 @@ class AuthController extends Controller
     public function show()
     {
         $user = User::findOrFail(auth()->id());
-        return view('dashboard.account', ['user' => $user]);
+
+        if ($user->roles->first()->role_name == 'S') {
+            return view('profile.show', ['user' => $user]);
+        } else {
+            return view('dashboard.account', ['user' => $user]);
+        }
     }
 }

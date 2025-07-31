@@ -51,13 +51,17 @@ Route::middleware('auth')->group(function () {
     // Available to all authenticated users
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    Route::middleware('role:S')->group(function () {
+        Route::get('/profile', [AuthController::class, 'show'])->name('profile');
+    });
+
     // Admin-only resources
     Route::middleware('role:A')->group(function () {
         Route::resource('roles', RoleController::class);
     });
 
     // Admin and Contributor resources
-    Route::middleware('role:A,C')->group(function () {
+    Route::middleware('role:A,C,S')->group(function () {
         Route::resource('categories', CategoryController::class);
         Route::resource('posts', controller: PostController::class); // this one has all our posts functions
         Route::resource('comments', controller: CommentController::class); // this one has all our comments functions

@@ -20,18 +20,25 @@ class RelationshipSeeder extends Seeder
         foreach ($users as $user) {
 
             $roleID = null;
-            if ($user->email === 'admin@test.com') {
-                $roleID = 1;
-            } else if ($user->email = "contributor@test.com") {
-                $roleID = 2;
-            } else {
-                $roleID = fake()->randomElement($roles);
-            }
+
+            $roleID = fake()->randomElement($roles);
 
             DB::table('user_role')->insert([
                 'user_id' => $user->id,
                 'role_id' => $roleID
             ]);
+
+            if ($user->email === 'admin@test.com') {
+                DB::table('user_role')->where('user_id', 1)->update(['role_id' => 1]);
+            }
+
+            if ($user->email = "contributor@test.com") {
+                DB::table('user_role')->where('user_id', 2)->update(['role_id' => 2]);
+            }
+
+            if ($user->email = "subscriber@test.com") {
+                DB::table('user_role')->where('user_id', 3)->update(['role_id' => 3]);
+            }
         }
 
         $posts = Post::all();

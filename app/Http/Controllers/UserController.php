@@ -85,6 +85,7 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:30'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'password' => ['nullable', Rules\Password::defaults()],
+            'confirm_password' => ['required_with:password', 'same:password'],
         ]);
 
         $data = [
