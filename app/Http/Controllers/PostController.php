@@ -58,6 +58,12 @@ class PostController extends Controller
 
         $categories = Category::all();
 
+        if (url()->previous() === route('dashboard')) {
+            session(['post_return_url' => route('dashboard')]);
+        } else {
+            session(['post_return_url' => route('landing')]);
+        }
+
         Log::info("Post.create - END");
         return view('posts.create', ['categories' => $categories]);
     }
@@ -147,13 +153,14 @@ class PostController extends Controller
             } else {
                 Log::warning("Post.store - Post.save() returned false");
             }
+
+            // Step 6: Redirect back;
+            Log::info("Post.store - Post Store Function END");
+            $redirectTo = session('post_return_url', route('posts.create'));
+            return redirect($redirectTo)->with('success', 'Post stored successfully!');
         } catch (\Exception $e) {
             Log::error("Post.store - Exception occurred: " . $e->getMessage());
         }
-
-        // Step 6: Redirect back;
-        Log::info("Post.store - Post Store Function END");
-        return redirect()->back()->with('success', 'Post stored successfully!');
     }
 
     /**
