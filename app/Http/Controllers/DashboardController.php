@@ -56,7 +56,7 @@ class DashboardController extends Controller
 
                 // Get recent users with roles
                 $recentUsers = User::with(['roles:id,role_name'])
-                    ->select('id', 'name', 'email', 'profile_photo', 'created_at', 'updated_at')
+                    ->select('id', 'name', 'email', 'profile_photo', 'registration_date', 'updated_at')
                     ->orderBy('created_at', 'desc')
                     ->limit(5)
                     ->get();
@@ -110,7 +110,7 @@ class DashboardController extends Controller
     public function posts(Request $request): View
     {
         try {
-            $query = Post::with(['users:id,name', 'categories:id,category_name']);
+            $query = Post::with(['users:id,name', 'categories:id,category_name'], 'publication_date');
 
             // Apply search filter - only search in title
             if ($request->has('search') && !empty(trim($request->input('search')))) {

@@ -35,9 +35,7 @@
                         <div class="flex-1 min-w-0">
                             <h4 class="text-sm font-medium text-gray-900 mb-1">{{ $post->title }}</h4>
                             <div class="flex items-center text-xs text-gray-500 space-x-4">
-                                <span>by {{ $post->users->name ?? 'Unknown' }}</span>
-                                <span>•</span>
-                                <span>{{ $post->created_at ? $post->created_at->diffForHumans() : 'Unknown date' }}</span>
+                                <span>by {{ $post->user->name ?? 'Unknown' }}</span>
                             </div>
                             @if($post->categories && $post->categories->count() > 0)
                                 <div class="mt-2">
