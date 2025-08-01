@@ -6,6 +6,7 @@
         <h1 class="font-semibold text-green-700 text-2xl">Think Finance!</h1>
         <p class="text-lg mb-4 text-gray-400">Register</p>
         @csrf
+        
         <input type="text" id="name" name="name" placeholder="Full Name" class="border border-solid w-full rounded-xl pl-4 p-2 mb-3"></input>
         <input type="email" id="email" name="email" placeholder="Email address" class="border border-solid w-full rounded-xl pl-4 p-2 mb-3"></input>
         <input type="password" id="password" name="password" placeholder="Password" class="border border-solid w-full rounded-xl pl-4 p-2 mb-3"></input>

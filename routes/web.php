@@ -11,8 +11,22 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/home', [LandingController::class, 'index'])->name('home');
+
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'authenticate']);
+
+Route::get('/forgot', [AuthController::class, 'showEmailInput'])
+    ->name('password.request');
+
+Route::post('/forgot', [AuthController::class, 'sendLink'])
+    ->name('password.email');
+
+Route::get('/forgot/{token}', [AuthController::class, 'showForgot'])
+    ->name('password.reset');
+
+Route::post('/reset-password', [AuthController::class, 'forgot'])
+    ->name('password.update');
+
 
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
