@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingController::class, 'index'])->name('landing');
@@ -51,10 +52,11 @@ Route::prefix('dashboard')->name('dashboard.')->middleware(['auth', 'role:A,C'])
 
     // User management routes - admin only (role 'A')
     Route::middleware('role:A')->group(function () {
-        Route::get('/users', [DashboardController::class, 'users'])->name('users');
-        Route::post('/users', [DashboardController::class, 'storeUser'])->name('users.store');
-        Route::delete('/users/{user}', [DashboardController::class, 'deleteUser'])->name('users.delete');
-        Route::put('/users/{user}/role', [DashboardController::class, 'updateUserRole'])->name('users.updateRole');
+        //User Management
+        Route::get('/users', [UserController::class, 'index'])->name('users');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.delete');
+        Route::put('/users/{user}/role', [UserController::class, 'updateUserRole'])->name('users.updateRole');
     });
 });
 
@@ -79,6 +81,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', CategoryController::class);
         Route::resource('posts', controller: PostController::class); // this one has all our posts functions
         Route::resource('comments', controller: CommentController::class); // this one has all our comments functions
+        Route::put('/user/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/user/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     });
 });
 
@@ -93,7 +97,3 @@ Route::get('/db-check', function () {
         'current_posts' => \App\Models\Post::count(),
     ]);
 });
-
-use App\Http\Controllers\UserController;
-
-Route::resource('users', UserController::class)->middleware('auth');

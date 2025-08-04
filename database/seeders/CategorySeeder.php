@@ -17,27 +17,27 @@ class CategorySeeder extends Seeder
         Category::create([
             "category_name" => "Budgeting & Savings",
             "slug" => Str::slug("Budgeting & Savings"),
-            "description" => "Budgeting & Savings."
+            "description" => fake()->paragraph(),
         ]);
         Category::create([
             "category_name" => "Investing",
             "slug" => Str::slug("Investing"),
-            "description" => "Investing."
+            "description" => fake()->paragraph(),
         ]);
         Category::create([
             "category_name" => "Debt & Credit",
             "slug" => Str::slug("Debt & Credit"),
-            "description" => "Debt & Credit."
+            "description" => fake()->paragraph(),
         ]);
         Category::create([
             "category_name" => "Financial Planning",
             "slug" => Str::slug("Financial Planning"),
-            "description" => "Financial Planningt."
+            "description" => fake()->paragraph(),
         ]);
         Category::create([
             "category_name" => "Career & Income",
             "slug" => Str::slug("Career & Income"),
-            "description" => "Career & Income."
+            "description" => fake()->paragraph(),
         ]);
     }
 }
