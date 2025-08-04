@@ -33,13 +33,11 @@ function updateStatus(postId, status) {
 }
 </script>
 
-
-
 <table class="min-w-full divide-y divide-gray-200">
     <thead class="bg-gray-50">
         <tr>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <input type="checkbox" class="rounded border-gray-300">
+                ID
             </th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Title
@@ -66,7 +64,7 @@ function updateStatus(postId, status) {
             @foreach($posts as $post)
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <input type="checkbox" class="rounded border-gray-300" value="{{ $post->id }}">
+                        <span class="text-sm font-medium text-gray-900">{{ $post->id }}</span>
                     </td>
                     <td class="px-6 py-4">
                         <div class="text-sm font-medium text-gray-900">
@@ -124,7 +122,9 @@ function updateStatus(postId, status) {
                         </select>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {{ $post->publication_date ? $post->publication_date : 'No date' }}
+                    {{ $post->publication_date 
+                        ? \Carbon\Carbon::parse($post->publication_date)->format('M d, Y') 
+                        : 'No date' }}                    
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div class="flex items-center justify-end space-x-3">
@@ -151,9 +151,13 @@ function updateStatus(postId, status) {
         @endif
     </tbody>
 </table>
+
+@if($posts->count())
 <div class="px-10 pb-5 mt-3">
     {{ $posts->links() }}
 </div>
+@endif
+
 
 
 

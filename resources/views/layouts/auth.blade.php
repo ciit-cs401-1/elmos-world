@@ -4,6 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>Think Finance</title>
 
         <!-- Fonts -->
@@ -18,6 +19,6 @@
         'resources/js/app.js']) @else @endif
     </head>
     <body class="bg-green-700 h-screen flex items-center justify-center">
-        <main class="container w-[35%]">@yield('content')</main>
+        <main class="container md:w-[35%] w-full">@yield('content')</main>
     </body>
 </html>

@@ -35,9 +35,15 @@
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium text-gray-900">{{ $user->name }}</p>
                             @if($user->roles && $user->roles->count() > 0)
-                                <p class="text-xs text-gray-500">{{ ucfirst($user->roles->first()->role_name) }}</p>
+                                <p class="text-xs text-gray-500">
+                                        @switch($user->roles->first()->role_name)
+                                            @case('A') Admin @break
+                                            @case('C') Contributor @break
+                                            @case('S') Subscriber @break
+                                            @default Invalid User @break
+                                        @endswitch
                             @endif
-                            <p class="text-xs text-gray-400">{{ $user->created_at ? $user->created_at->diffForHumans() : 'No date' }}</p>
+                            <p class="text-xs text-gray-400">{{ $user->registration_date->format('M d, Y') }}</p>
                         </div>
                     </div>
                 @endforeach

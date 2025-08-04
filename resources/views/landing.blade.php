@@ -4,32 +4,34 @@
     
 @section('content')
 
-<div class="bg-black p-10 rounded-2xl text-gray-50 min-h-100 flex flex-col-reverse">
-
-    @foreach ($featuredPosts as $post)
-        <div>
+@foreach ($featuredPosts as $post)
+<div class="relative bg-cover bg-center fill p-10 rounded-2xl text-gray-50 min-h-100 flex flex-col-reverse" style="background-image: url('{{ $post->media->first()?->url }}')">
+    <div class="relative z-10">
             <div class="text-md mb-2">Featured</div>
             <div class="text-5xl mb-1">{{$post->title}}</div>
             <div class="flex gap-5 items-center justify-center">
                 <span class="flex-11/12">{{Str::limit($post->content,300)}}</span>
                 <a class="flex-1/12 cursor-pointer" href="{{ route('posts.show', $post->id) }}">
-                    <svg class="w-10 h-10 text-gray-600 hover:text-green-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-10 h-10 text-white hover:text-green-600 duration-200 transition ease-in-out hover:translate-x-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </a>
             </div>
+            
         </div>
-    @endforeach
-   
+    <div class="rounded-2xl absolute  inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none"></div>
+    
 </div>
+@endforeach
+
 <div class="flex gap-10 mt-5">
     <div class="w-[70%]">
         <div class="text-2xl font-bold">Latest Posts</div>
         <div>
             <div class="grid grid-cols-2 gap-7 mt-5">
                 @foreach ($latestPosts as $post)
-                    <div class="cursor-pointer">
-                        <div class="bg-black h-[200px] rounded-2xl mb-2"></div>
+                    <div class="cursor-pointer shadow-md h-full rounded-3xl p-5 mb-2 transition ease-in-out hover:scale-102">
+                        <div class="bg-cover bg-center h-[200px] rounded-2xl mb-2" style="background-image: url('{{ $post->media->first()?->url }}')"></div>
 
                            <div class="my-2 mr-3 text-xs flex flex-wrap gap-1">
                                 @foreach ($post->categories as $category)
@@ -66,7 +68,9 @@
                             </span>                    
                         </div>                    
                         <div class="text-black mb-4">{{Str::limit($post->content,150)}}</div>
-                        <a class="text-white bg-green-700 py-3 px-5 rounded-xl cursor-pointe mt-3" href="{{ route('posts.show', $post->id) }}">Read more</a>
+                        <div class="w-full mt-10 mb-2">
+                            <a class="text-white bg-green-700 py-3 px-5 rounded-xl cursor-pointer transition ease-in-out hover:bg-green-900" href="{{ route('posts.show', $post->id) }}">Read more</a>
+                        </div>
                     </div>
                 @endforeach
             </div>
@@ -80,12 +84,14 @@
         <div class="grid grid-cols-1 gap-2 mt-5">
 
             @foreach ($popularPosts as $post)
-                <a class="bg-black h-[200px] rounded-2xl mb-2 p-5 cursor-pointer text-white flex flex-col-reverse" href="{{ route('posts.show', $post->id) }}">
+                <a class="relative bg-cover bg-center h-[200px] rounded-2xl mb-2 p-5 cursor-pointer text-white flex flex-col-reverse transition ease-in-out hover:scale-102" style="background-image: url('{{ $post->media->first()?->url }}')" href="{{ route('posts.show', $post->id) }}">
                     @foreach ($post->categories as $category)
-                        <div class="text-md">{{$category->category_name}}</div>
+                        <div class="text-md z-1">{{$category->category_name}}</div>
                     @endforeach
-                    <div class="text-2xl mb-1">{{$post->title}}</div>
+                    <div class="text-2xl mb-1 z-1">{{$post->title}}</div>
+                    <div class="rounded-2xl absolute  inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none"></div>
                 </a>
+                
             @endforeach
  
         </div>

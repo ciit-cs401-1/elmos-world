@@ -25,7 +25,6 @@ class Setup extends Command
      */
     public function handle()
     {
-        $this->runProcess(['composer', 'install'], "[STEUP]: updating composer");
         $this->runProcess(['npm', 'install'], "[STEUP]: node and vite composer");
 
         if (!file_exists(base_path('.env'))) {
@@ -35,12 +34,32 @@ class Setup extends Command
             $this->warn('[STEUP]: .env failed to generate');
         }
 
-        $this->call('key:generate');
-        $this->info('[STEUP]: generated a key');
-        $this->call('migrate', ['--force' => true]);
-        $this->info('[STEUP]: migrated database');
-        $this->call('db:seed', ['--force' => true]);
-        $this->info('[STEUP]: seeded the database');
+        $this->call(command: 'key:generate');
+        $this->info(string: '[STEUP]: generated a key');
+        $this->call(command: 'migrate', arguments: ['--force' => true]);
+        $this->info(string: '[STEUP]: migrated database');
+        try {
+            $this->call(command: 'db:seed', arguments: ['--force' => true]);
+            $this->info('[SETUP]: seeded the database');
+        } catch (\Exception $e) {
+            $error_code = $e->getCode();
+            $error_message = $e->getMessage();
+
+            $this->warn("[SETUP]: db exception ( $error_code ): $error_message");
+
+            if ($error_code == "23000") {
+                $this->warn("[SETUP]: db exception is the unique constraint failed");
+            }
+
+            $this->warn("[SETUP]: skipping db seeding");
+        }
+
+
+        $this->info('[SETUP]: Setup complete. Run the following in separate terminals:');
+        $this->info("[STEUP]: Running Laravel");
+        $this->info('  php artisan serve');
+        $this->info("[STEUP]: Running TailwindCSS via NPM");
+        $this->info('  npm run dev');
     }
 
     private function runProcess(array $command, string $message)

@@ -26,6 +26,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'registration_date',
+    ];
+
+    protected $casts = [
+        'registration_date' => 'datetime',
     ];
 
     /**
@@ -47,6 +52,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'registration_date' => 'datetime',
+            'last_login_date' => 'datetime',
             'password' => 'hashed',
         ];
     }

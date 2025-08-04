@@ -163,12 +163,12 @@
 <hr class="mt-20 text-gray-300">
 
 <div class="px-20 text-2xl font-bold mt-10 text-center">Other Articles</div>
-<div class="px-20 grid grid-cols-3 gap-7 mt-5">
+<div class="px-20 grid grid-cols-3 gap-10 mt-5 mb-30">
     @foreach ($others as $other)
-        <a class="cursor-pointer" href="{{ route('posts.show', $other->id) }}">
-            <div class="h-[200px] rounded-2xl mb-2 bg-cover bg-center" style="background-image: url('{{ $post->media->first()?->url }}')"></div>
+        <a class="cursor-pointer shadow-md p-5 rounded-2xl transition hover:scale-105" href="{{ route('posts.show', $other->id) }}" >
+            <div class="h-[200px] rounded-2xl mb-2 bg-cover bg-center mb-5" style="background-image: url('{{ $post->media->first()?->url }}')"></div>
             <div class="my-2 mr-3 text-xs flex flex-wrap gap-1">
-            @foreach ($post->categories as $category)
+            @foreach ($other->categories as $category)
                 <span class="px-2 py-1 rounded-full text-white
                     @switch($category->category_name)
                         @case('Budgeting & Savings') bg-green-600 @break
