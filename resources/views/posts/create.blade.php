@@ -44,7 +44,6 @@
 
             <!-- the input -->
             <input
-                name="post_tags"
                 id="tagInput"
                 type="text"
                 placeholder="Add a tag and press Enter"
@@ -62,6 +61,13 @@
                 function renderTags() {
                     container.innerHTML = '';
                     tags.forEach((tag, i) => {
+
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'post_tags[]';
+                    hiddenInput.value = tag;
+                    container.appendChild(hiddenInput);
+
                     const chip = document.createElement('span');
                     chip.className =
                         'flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm';

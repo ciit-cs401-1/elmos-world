@@ -85,8 +85,7 @@ class PostController extends Controller
             'post_image' => 'nullable|string',
             'post_categories' => 'nullable|array',
             'post_categories.*' => 'exists:categories,id',
-            'post_tags' => 'nullable|string',
-            'post_tags.*' => 'exists:tags,id',
+            'post_tags' => 'nullable|array',
         ]);
 
         // 1: Reject bad image links
@@ -146,17 +145,27 @@ class PostController extends Controller
                     $post_categories_pivot_table->sync($request->post_categories ?? []); // remove any rows related to this post and add these new ones instead.
                 }
                 if ($has_tags_flag) {
-                    $post_tags_pivot_table = $post->tags();
-                    $post_tags_pivot_table->sync($request->post_tags ?? []);
+
+                    $tagIds = [];
+
+                    foreach ($validated_request_items['post_tags'] as $value) {
+                        $tag =  Tag::firstOrCreate(
+                            ['tag_name' => $value],
+                            ['slug' => Str::slug($value)]
+                        );
+                        $tagIds[] = $tag->id;
+                    }
+
+                    $post->tags()->sync($tagIds);
                 }
             } else {
                 Log::warning("Post.store - Post.save() returned false");
+                return redirect()->back()->with('success', 'Post stored successfully!');
             }
 
             // Step 6: Redirect back;
             Log::info("Post.store - Post Store Function END");
-            $redirectTo = session('post_return_url', route('posts.create'));
-            return redirect($redirectTo)->with('success', 'Post stored successfully!');
+            return redirect()->back()->with('success', 'Post stored successfully!');
         } catch (\Exception $e) {
             Log::error("Post.store - Exception occurred: " . $e->getMessage());
         }
@@ -244,18 +253,11 @@ class PostController extends Controller
         Log::info("\n");
 
         // 1: Cleaning and Decode the JSON String post_tags;
-        $raw_tags = ($request->post_tags);
-        Log::info("Raw Tags: " . json_encode($raw_tags));
-        $tags_string = is_array($raw_tags) ? $raw_tags[0] : $raw_tags;
-        Log::info("Raw Tags (cleaned): $tags_string");
-        $decoded_tags = json_decode($tags_string, true);
-        Log::info("Decoded Tags: " . json_encode($decoded_tags));
-        $request->post_tags = $decoded_tags;
-        $post_tag_id_list = []; // {"tag_name": "sample", "tag_id": 1}
+        $tags = ($request->post_tags);
 
         // Step 2: Add any new tags if there are new words from the tag.
         Log::info("Post.update: Operation - adding new tag_names string to tags table");
-        foreach ($decoded_tags as $tag_name) {
+        foreach ($tags as $tag_name) {
             $doesTagExist = Tag::where("tag_name", $tag_name)->exists();
             if ($doesTagExist == false) {
                 Log::info("Post.update: adding new tag_name: $tag_name to tags table");
@@ -267,16 +269,9 @@ class PostController extends Controller
             } else {
                 Log::info("Post.update: $tag_name already exists in tags table");
             }
-
-            // Step 3: Fetch the tag_id using the tag_name;
-            $tag = Tag::where("tag_name", $tag_name)->first();
-            $post_tag_id_list[] = $tag->id;
         };
         // Step 3: Check if previous post tags are changed or not.
         $post = Post::find($id);
-
-        $request->merge(['post_tags' => $post_tag_id_list]);
-        Log::info("Post.update: my request->post_tags: " . json_encode($request->post_tags));
 
         // Step 3: Now that we have proper tags_id, validate request.
         $validated_request_items = null;
@@ -288,7 +283,6 @@ class PostController extends Controller
                 'post_categories' => 'nullable|array',
                 'post_categories.*' => 'exists:categories,id',
                 'post_tags' => 'nullable|array',
-                'post_tags.*' => 'exists:tags,id',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Step 3: Handle validation errors
@@ -340,6 +334,7 @@ class PostController extends Controller
                 Log::info("Post.update: new_image_url_link: ", [$new_image_url_link]);
                 $is_post_featured_image_url_changed = ($post->featured_image_url ?? "") !== ($validated_request_items["post_image"] ?? "");
                 Log::info("Post.update: Is post_image_url changed", ['changed' => $is_post_featured_image_url_changed]);
+                $is_post_tags_changed = $post->post_tags !== $validated_request_items["post_tags"];
 
                 $old_post_category_ids = $post->categories->pluck('id')->toArray() ?? [];
                 $new_post_category_ids = $validated_request_items["post_categories"] ?? [];
@@ -353,16 +348,6 @@ class PostController extends Controller
                 Log::info("Post.update: new-categories", ['category_ids' => $new_sorted]);
                 Log::info("Post.update: Is the post categories changed?", ['changed' => $is_post_categories_changed]);
 
-                $old_tags = $post->tags->pluck('id')->toArray();
-                $new_tags = $post_tag_id_list;
-
-                $old_tags_sorted = collect($old_tags)->sort()->values()->toArray();
-                $new_tags_sorted = collect($new_tags)->sort()->values()->toArray();
-
-                $is_post_tags_changed = $old_tags_sorted !== $new_tags_sorted;
-
-                Log::info("Post.update: old-tags", ['tag_ids' => $old_tags]);
-                Log::info("Post.update: new-tags", ['tag_ids' => $new_tags]);
                 Log::info("Post.update: were post_tags changed?", ['changed' => $is_post_tags_changed]);
             } catch (\Exception $e) {
                 Log::error("Post.update: Error checking the data: $e");
@@ -380,6 +365,7 @@ class PostController extends Controller
                 Log::info("Post.update: updated post_content");
                 $is_there_any_changes = true;
             };
+
             if ($is_post_featured_image_url_changed) {
                 $new_image_url_link = $validated_request_items["post_image"] ?? "";
                 $is_new_image_url_link_valid = $this->isValidImageLink($new_image_url_link);
@@ -393,16 +379,27 @@ class PostController extends Controller
                     $is_there_any_changes = false;
                 }
             };
+
             if ($is_post_categories_changed) {
                 Log::info("Post.update: syncing the new post_categories");
                 $post_categories_pivot_table = $post->categories();
                 $post_categories_pivot_table->sync($validated_request_items["post_categories"]);
                 $is_there_any_changes = true;
             };
+
             if ($is_post_tags_changed) {
                 Log::info("Post.update: syncing the new post_tags");
-                $post_tags_pivot_table = $post->tags();
-                $post_tags_pivot_table->sync($validated_request_items["post_tags"]);
+                $tagIds = [];
+
+                foreach ($validated_request_items['post_tags'] as $value) {
+                    $tag =  Tag::firstOrCreate(
+                        ['tag_name' => $value],
+                        ['slug' => Str::slug($value)]
+                    );
+                    $tagIds[] = $tag->id;
+                }
+
+                $post->tags()->sync($tagIds);
                 $is_there_any_changes = true;
             };
 

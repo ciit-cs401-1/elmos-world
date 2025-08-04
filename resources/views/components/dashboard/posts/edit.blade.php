@@ -33,97 +33,72 @@
                     @endforeach
                 </div>
                 <!-- TAG INPUT -->
-                <div id="tagBox" class="w-full mb-3">
-                    <!-- existing tags get injected here -->
-                    <div id="tagContainer" class="flex flex-wrap gap-2 mb-2"></div>
+                <div id="tagBox" class="w-full mb-3"></div>
+                <!-- existing tags get injected here -->
+                <div id="tagContainer" class="flex flex-wrap gap-2 mb-2"></div>
 
-                    <!-- the input -->
-                    <input id="tag_input" type="text" placeholder="Add a tag and press Enter"
-                        class="w-full h-10 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-
-                    <!-- Hidden field to store submitted tag IDs -->
-                    <input type="text" name="post_tags[]" id="hidden_tag_input" readonly>
+                <!-- the input -->
+                <input
+                    id="tagInput"
+                    type="text"
+                    placeholder="Add a tag and press Enter"
+                    class="w-full h-10 p-4 border border-gray-300 rounded-lg
+                        focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
 
                 <script>
-                    // Step 1: Prefill tagmap with tags
-                    console.log("prefilling tag_name with tag_names");
-                    const tag_names = [
+                // simple state
+                 const tags = [
                         @foreach($tags as $tag)
                             "{{ $tag->tag_name }}",
                         @endforeach
                     ];
+                const input = document.getElementById('tagInput');
+                const container = document.getElementById('tagContainer');
 
-                    // Step 2: Take note of what is already displayed on page.
-                    const already_displayed_tag_names = [];
-                    
-                    const input = document.getElementById('tag_input');
-                    const container = document.getElementById('tagContainer');
-                    const hiddenInput = document.getElementById('hidden_tag_input');
+                // render helper
+                renderTags();
+                
+                function renderTags() {
+                    container.innerHTML = '';
+                    tags.forEach((tag, i) => {
 
-                    function renderTags() {
-                        console.log("tag-names:", tag_names);
-                        console.log("rendered-tag-names:", already_displayed_tag_names);
-                        tag_names.forEach( (tag_name, index) => {
-                            console.log(tag_name, index);
-                            if (already_displayed_tag_names.includes(tag_name) == false) {
-                                console.log("tag doesn't exist in display. Render this tag");
-                                const chip_element = document.createElement('span');
-                                chip_element.innerHTML = '';
-                                chip_element.className = 'chip-design'; // chip-design in app.css
-                                chip_element.innerHTML = `${tag_name}<button type="button" data-index="${index}" class="text-blue-500 hover:text-blue-700">&times;</button>`;
-                                container.appendChild(chip_element);
-                                already_displayed_tag_names.push(tag_name);
-                            }
-                        });
-                        hiddenInput.value = JSON.stringify(tag_names);
-                    }
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'post_tags[]';
+                    hiddenInput.value = tag;
+                    container.appendChild(hiddenInput);
 
-                    input.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter' || e.key === ',') {
-                            e.preventDefault();
-                            if (input.value.trim()) {
-                                const tag = input.value.trim();
-                                var does_tag_exist_in_tag_name = tag_names.includes(tag);
-
-                                if (does_tag_exist_in_tag_name == false) {
-                                    tag_names.push(tag);
-                                    renderTags();
-                                };
-                                input.value = '';
-                            };
-                        };
+                    const chip = document.createElement('span');
+                    chip.className =
+                        'flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm';
+                    chip.innerHTML = `
+                        ${tag}
+                        <button data-index="${i}" class="text-blue-500 hover:text-blue-700">
+                        &times;
+                        </button>`;
+                    container.appendChild(chip);
                     });
-                    
+                }
 
-                    container.addEventListener('click', (e) => {
-                        if (e.target.tagName === 'BUTTON') {
-                            const chip = e.target.parentElement;
-                            const tagText = chip.textContent.replace('×', '').trim();
-
-                            // Remove the tag from both arrays
-                            const tagIndex = tag_names.indexOf(tagText);
-                            if (tagIndex !== -1) {
-                                tag_names.splice(tagIndex, 1);
-                            }
-
-                            const displayedIndex = already_displayed_tag_names.indexOf(tagText);
-                            if (displayedIndex !== -1) {
-                                already_displayed_tag_names.splice(displayedIndex, 1);
-                            }
-
-                            // Remove the chip element directly
-                            container.removeChild(chip);
-
-                            // Update hidden input
-                            hiddenInput.value = JSON.stringify(tag_names);
-                        }
-                    });
-
-
-                    // Initial render
+                // add tag on Enter / comma
+                input.addEventListener('keydown', (e) => {
+                    if ((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+                    e.preventDefault();
+                    tags.push(input.value.trim());
+                    input.value = '';
                     renderTags();
-                </script>
+                    }
+                });
+
+                // remove tag on × click
+                container.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON') {
+                    tags.splice(e.target.dataset.index, 1);
+                    renderTags();
+                    }
+                });
+            </script>
 
                 {{-- SUBMIT BUTTON --}}
                 <div class="flex justify-center">
@@ -131,9 +106,6 @@
                         Update
                     </button>
                 </div>
-
-
-                @extends('layouts.master')
         </form>
     </div>
 </div>
