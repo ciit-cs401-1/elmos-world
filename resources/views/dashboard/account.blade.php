@@ -1,7 +1,13 @@
 @extends('layouts.dashboard')
 
 @section('content')
+
 <div class="p-6">
+    
+    @if(request()->routeIs('dashboard.user-account'))
+    <a class="flex items-center gap-2 mb-5 text-green-800 cursor-pointer" href="{{route('dashboard.users')}}"><x-ri-arrow-left-long-line class="h-5"/>Back</a>
+    @endif
+
     <div>
         <x-dashboard.main.page-header 
             title="Account Management" 
@@ -54,6 +60,55 @@
                 </form>
             </div>
         </div>
+
+        @if(request()->routeIs('dashboard.user-account'))
+        <!-- Role Section -->
+        <div x-data="{ editProfile: false }" class="rounded-t-lg shadow-sm border-gray-100 mb-4">
+            <!-- Header -->
+            <div class="px-6 py-3 border-b border-gray-100 bg-gray-200 rounded-t-lg text-gray-700 font-bold flex items-center justify-between">
+                <span>Role</span>
+               <a @click.prevent="editProfile = !editProfile" 
+                href="#" 
+                class="bg-blue-800 text-white px-3 py-2 rounded-2xl cursor-pointer">
+
+                    <template x-if="!editProfile">
+                        <x-tabler-pencil class="h-5"/>
+                    </template>
+                    
+                    <template x-if="editProfile">
+                        <x-tabler-x class="h-5"/>
+                    </template>
+                </a>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 bg-white rounded-b-lg shadow-sm border border-gray-100">
+                <form method="POST" action="/dashboard/users/{{ $user->id }}/role" class="grid grid-cols-2 gap-y-5">
+                    @csrf
+                    @method('PUT')
+                    <div class="font-semibold">Role:</div>
+                    
+                    <select x-show="editProfile" name="role_id" class="w-full h-10 px-4 mb-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        @if($roles)
+                        @foreach($roles as $role)
+                            <option value="{{ $role->id }}" {{ $user->roles->contains('id', $role->id) ? 'selected' : '' }}>
+                                {{ $role->display_name ?? $role->role_name }}
+                                    </option>
+                        @endforeach
+                        @endif
+                    </select>
+
+                    <div x-show="!editProfile">{{ $user->roles->first()->formal_name }}</div>
+
+                    <div class="col-span-2 col-start-1 flex justify-end" x-show="editProfile">
+                        <button class="px-10 py-3 mt-5 bg-green-800 text-white rounded-2xl">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @endif
 
         <!-- Password Section -->
         <div x-data="{ editPassword: false }" class="rounded-t-lg shadow-sm border border-gray-100">

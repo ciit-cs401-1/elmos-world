@@ -57,7 +57,7 @@ Route::prefix('dashboard')->name('dashboard.')->middleware(['auth', 'role:A,C'])
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.delete');
         Route::put('/users/{user}/role', [UserController::class, 'updateUserRole'])->name('users.updateRole');
-        Route::get('/user/{user}', [UserController::class, 'edit'])->name('user.account');
+        Route::get('/user-account/{user}/edit', [UserController::class, 'edit'])->name('user-account');
     });
 });
 

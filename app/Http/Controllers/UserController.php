@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
@@ -146,7 +147,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        return view('users.edit', compact('user'));
+        $roles = Role::all();
+        return view('dashboard.account', ['user' => $user, 'roles' => $roles]);
     }
 
     /**
@@ -172,6 +174,13 @@ class UserController extends Controller
 
         $user->update($data);
 
+        if ($user->id === auth()->id() && $request->filled('password')) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('landing')->with('success', "Password changed!");
+        }
+
         return redirect()->back()->with('success', 'User updated successfully.');
     }
 
@@ -193,7 +202,12 @@ class UserController extends Controller
         $user->comments()->delete();
         $user->roles()->detach();
         $user->delete();
-        return redirect()->back()->with('success', 'User deleted successfully.');
+
+        if ($user->id === auth()->user()->id) {
+            return redirect()->route('landing')->with('success', 'User deleted successfully.');
+        } else {
+            return redirect()->route('dashboard.users')->with('success', 'User deleted successfully.');
+        }
     }
 
     /**

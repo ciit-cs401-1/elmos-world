@@ -54,38 +54,38 @@
                 </a>
 
                 <a href="{{ route('dashboard.posts') }}" 
-                   class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('dashboard.posts') ? 'text-white' : 'text-gray-700 hover:bg-gray-100' }}"
-                   style="{{ request()->routeIs('dashboard.posts') ? 'background-color: #008236;' : '' }}">
+                   class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('dashboard.posts*') ? 'text-white' : 'text-gray-700 hover:bg-gray-100' }}"
+                   style="{{ request()->routeIs('dashboard.posts*') ? 'background-color: #008236;' : '' }}">
                     <x-heroicon-o-document-text class="w-5 h-5" />
                     <span class="font-medium">Posts Management</span>
                 </a>
 
                 @admin
                 <a href="{{ route('dashboard.users') }}" 
-                   class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('dashboard.users') ? 'text-white' : 'text-gray-700 hover:bg-gray-100' }}"
-                   style="{{ request()->routeIs('dashboard.users') ? 'background-color: #008236;' : '' }}">
+                   class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('dashboard.users', 'dashboard.user-account') ? 'text-white' : 'text-gray-700 hover:bg-gray-100' }}"
+                   style="{{ request()->routeIs('dashboard.users', 'dashboard.user-account') ? 'background-color: #008236;' : '' }}">
                     <x-heroicon-o-users class="w-5 h-5" />
                     <span class="font-medium">User Management</span>
                 </a>
 
                 <a href="{{ route('roles.index') }}" 
-                   class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('roles.index') ? 'text-white' : 'text-gray-700 hover:bg-gray-100' }}"
-                   style="{{ request()->routeIs('roles.index') ? 'background-color: #008236;' : '' }}">
+                   class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('roles.*') ? 'text-white' : 'text-gray-700 hover:bg-gray-100' }}"
+                   style="{{ request()->routeIs('roles.*') ? 'background-color: #008236;' : '' }}">
                     <x-heroicon-o-tag class="w-5 h-5" />
                     <span class="font-medium">Role List</span>
                 </a>
 
                 <a href="{{ route('categories.index') }}" 
-                   class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('categories.index') ? 'text-white' : 'text-gray-700 hover:bg-gray-100' }}"
-                   style="{{ request()->routeIs('categories.index') ? 'background-color: #008236;' : '' }}">
+                   class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('categories.*') ? 'text-white' : 'text-gray-700 hover:bg-gray-100' }}"
+                   style="{{ request()->routeIs('categories.*') ? 'background-color: #008236;' : '' }}">
                     <x-heroicon-m-paper-clip class="w-5 h-5" />
                     <span class="font-medium">Category List</span>
                 </a>
                 @endadmin
 
                 <a href="{{ route('dashboard.account.show') }}" 
-                   class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('account.show') ? 'text-white' : 'text-gray-700 hover:bg-gray-100' }}"
-                   style="{{ request()->routeIs('account.show') ? 'background-color: #008236;' : '' }}">
+                   class="flex items-center space-x-3 px-3 py-2 rounded-lg {{ request()->routeIs('dashboard.account.*') ? 'text-white' : 'text-gray-700 hover:bg-gray-100' }}"
+                   style="{{ request()->routeIs('dashboard.account.*') ? 'background-color: #008236;' : '' }}">
                     <x-heroicon-c-user-circle class="w-5 h-5" />
                     <span class="font-medium">Account</span>
                 </a>

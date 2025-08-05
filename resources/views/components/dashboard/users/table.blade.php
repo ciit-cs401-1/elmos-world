@@ -97,33 +97,13 @@
                             <div class="flex justify-end gap-3">
                                 <div class="relative">
                                     
-                                    <a href="{{ route('dashboard.user.account', $user->id) }}"
+                                    <a href="{{ route('dashboard.user-account', $user->id) }}"
                                            class="bg-blue-600 text-white px-3 py-2 rounded-2xl cursor-pointer flex items-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
                                     </a>
                                     
-                                    {{-- <!-- Role Dropdown -->
-                                    <div id="roleDropdown-{{ $user->id }}" class="absolute right-0 mt-2 z-10 hidden bg-white rounded-md shadow-lg p-3 border border-gray-200 w-52">
-                                        <div class="text-xs font-medium text-gray-900 mb-2 text-left">Change Role</div>
-                                        <form method="POST" action="/dashboard/users/{{ $user->id }}/role">
-                                            @csrf
-                                            @method('PUT')
-                                            <select name="role_id" class="mb-3 w-full text-sm border-gray-300 rounded-md">
-                                                @if($roles)
-                                                    @foreach($roles as $role)
-                                                        <option value="{{ $role->id }}" {{ $user->roles->contains('id', $role->id) ? 'selected' : '' }}>
-                                                            {{ $role->display_name ?? $role->role_name }}
-                                                        </option>
-                                                    @endforeach
-                                                @endif
-                                            </select>
-                                            <div class="flex justify-end">
-                                                <button type="submit" class="bg-indigo-600 text-white text-xs px-3 py-1 rounded cursor-pointer">Update</button>
-                                            </div>
-                                        </form>
-                                    </div> --}}
                                 </div>
                             </div>
                         </td>
