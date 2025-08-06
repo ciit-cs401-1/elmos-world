@@ -96,13 +96,7 @@ class UserController extends Controller
                     'registration_date' => now(),
                 ]);
 
-                // Only allow Admin (A) and Contributor (C) roles
-                $allowedRoles = Role::whereIn('role_name', ['A', 'C'])
-                    ->whereIn('id', $request->roles)
-                    ->pluck('id');
-
-                // Attach selected roles
-                $user->roles()->attach($allowedRoles);
+                $user->roles()->attach($request['roles']);
 
                 return $user;
             });

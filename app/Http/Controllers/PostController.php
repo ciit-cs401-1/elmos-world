@@ -38,6 +38,7 @@ class PostController extends Controller
 
         $posts = $posts->whereNotNull('publication_date')
             ->with(['users', 'media', 'categories'])
+            ->where('status', 'P')
             ->orderBy('publication_date', 'desc')
             ->paginate(10);
 
