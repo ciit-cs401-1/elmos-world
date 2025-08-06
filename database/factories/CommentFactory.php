@@ -30,6 +30,8 @@ class CommentFactory extends Factory
             'comment_context' => fake()->paragraph(),
             'reviewer_email' => $user->find($userID)->email,
             'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
+            'is_comment_a_subcomment' => false,
+            'under_what_comment_id_is_this_comment' => null,
         ];
     }
 }

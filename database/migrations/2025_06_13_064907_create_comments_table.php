@@ -18,6 +18,10 @@ return new class extends Migration
             $table->string('reviewer_email')->nullable();
             $table->boolean('is_hidden')->default(false);
             $table->timestamps();
+
+            // This one is for the subcommenting
+            $table->boolean("is_comment_a_subcomment")->default(false);
+            $table->integer("under_what_comment_id_is_this_comment")->nullable();
         });
     }
 

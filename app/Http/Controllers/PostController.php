@@ -177,7 +177,7 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        Log::info("Post.show - user is in show page - targeted post to show ---> $id");
+        Log::info("Post.show - user is in show page post.$id");
 
         // Step 1: Retrieve the post or fail
         $post = Post::with('categories')->findOrFail($id);
@@ -191,14 +191,12 @@ class PostController extends Controller
         $user_id = Auth::id();
         $user_object = User::find($user_id); // returns the User model or null
 
-        $myComments = $comments->where('user_id', $user_id);
-        $othersComments = $comments->where('user_id', '!=', $user_id);
+        $comments = $comments->where("post_id", $id);
 
         // Step 4: Return view
         return view('posts.show', [
             'post' => $post,
-            'myComments' => $myComments,
-            'othersComments' => $othersComments,
+            'comments' => $comments,
             'others' => $others,
             'user_object_of_the_one_looking_at_this_page' => $user_object,
         ]);

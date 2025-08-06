@@ -161,23 +161,65 @@ class CommentController extends Controller
     public function replyToComment(Request $request)
     {
         Log::info("replyToComment - replying to comment START");
+        // debugging
+        Log::info("What's in under_what_comment_id?", ['under_what_comment_id' => $request->input('under_what_comment_id')]);
+        Log::info("What's in my comment_context?", ['comment_context' => $request->input('comment_context')]);
 
-        // Step 1: Validate the values & Validate if user is authenticated
-        $validated_requests = $request->validate([
-            'target_comment_id' => 'required|integer|exists:comments,id',
-            'comment_context' => 'required|string|max:1000',
-        ]);
-        $user = Auth::user();
+        // Step 1: validate the request
+        $validated_requests = null;
+        try {
+            $validated_requests = $request->validate(rules: [
+                "under_what_comment_id" => 'required|integer',
+                "comment_context" => 'required|string|max:1000',
+                "inside_what_post_id" => 'required|integer',
+            ]);
+        } catch (\Exception $e) {
+            Log::info("CommentController@replyToComment - ERROR in validating request: $e");
+            return back()->withErrors("CommentController@replyToComment - ERROR in validating request: $e");
+        };
 
-        if (!$user) {
-            Log::warning("replyToComment - Unauthenticated user tried to reply.");
-            return redirect()->back()->withErrors('You must be logged in to reply.');
+        // Step 2: Check if user is authenticated
+        if (Auth::check() == false) {
+            Log::warning("User not authenticated when trying to reply to comment.");
+            return redirect()->back()->withErrors(['error' => 'User not authenticated.']);
         }
 
-        // Step 2: 
+        // Step 3: Add the new subcomment
+        $is_post_save_successful = false;
+        if ($validated_requests != null) {
+            // Step 1: Get current user name & email
+            $user = Auth::user();
+            $reviewer_name = $user->name;
+            $reviewer_email = $user->email;
 
 
-        Log::info("replyToComment - replying to comment END");
-        return redirect()->back()->with('success', 'Reply posted!');
+            // Step 2: Create the new comment
+            $comment = new Comment();
+            $comment->is_comment_a_subcomment = true;
+            // name & email
+            $comment->reviewer_name = $reviewer_name;
+            $comment->reviewer_email = $reviewer_name;
+            $comment->user_id = $user->id;
+            // set the other necessary details
+            $comment->comment_context = $validated_requests["comment_context"];
+            $comment->under_what_comment_id_is_this_comment = $validated_requests["under_what_comment_id"];
+            $comment->post_id = $validated_requests["inside_what_post_id"];
+
+            try {
+                $comment->save();
+                $is_post_save_successful = true;
+
+                Log::info("This current comment's id?", ['id' => $comment->id]);
+            } catch (\Exception $e) {
+                Log::info("CommentController@replyToComment - ERROR: post save wasn't successful: $e");
+                return back()->withErrors("CommentController@replyToComment - ERROR: post save wasn't successful: $e");
+            };
+        }
+
+        if ($is_post_save_successful) {
+            return redirect()->back()->with('success', 'Reply posted!');
+        } else {
+            return back()->withErrors("CommentController@replyToComment - ERROR: post save wasn't successful: is_post_save wasn't set to TRUE");
+        }
     }
 }

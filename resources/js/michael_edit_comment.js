@@ -1,6 +1,10 @@
-document.addEventListener("DOMContentLoaded", function () {
 
-    console.log("ShowBlade [CLIENT] - Content finished loading");
+document.addEventListener("DOMContentLoaded", function () {
+    
+    console.log("ShowBlade@michael_edit_comment - Content finished loading");
+
+    console.log("ShowBlade@michael_edit_comment - START");
+
 
     const totalComments = document.querySelectorAll('[id^="initiate-edit-comment-"]');
     let isEditing = false; // Track state
