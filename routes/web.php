@@ -82,6 +82,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', CategoryController::class);
         Route::resource('posts', controller: PostController::class); // this one has all our posts functions
         Route::resource('comments', controller: CommentController::class); // this one has all our comments functions
+        Route::post('/comments/reply', [CommentController::class, 'replyToComment'])->name('comments.reply');
         Route::put('/user/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/user/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     });

@@ -2,6 +2,11 @@
     
 @section('content')
 
+<head>
+    {{-- My Scripts for this view --}}
+    @vite('resources/js/michael_edit_comment.js') 
+</head>
+
 <a class="flex items-center gap-2 px-15 mb-10 mt-5 text-green-800 cursor-pointer" href="{{route('landing')}}"><x-ri-arrow-left-long-line class="h-5"/>Back to home</a>
 
 <div class="px-15 mt-5">
@@ -85,80 +90,121 @@
 
     
 
-    <!-- 🧍 Sample Comment -->
+    <!-- The Comment Section  -->
     <div class="flex gap-4">
         <div class="flex-1">
 
-            @foreach ($comments as $comment)
-                @if (auth()->user()->id === $comment->user_id)
-
-                    {{-- Broken Code I Think: <form action="{{ route('roles.destroy', $role->id) }}" method="POST"
-                                    onsubmit="return confirm('Are you sure you want to delete this role?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                        class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-lg text-xs transition duration-150 ease-in-out">
-                                        Delete
-                                    </button>
-                                </form> --}}
-
-                    <form class="mb-10" action="{{ route('comments.destroy', $comment->id) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <div class="flex items-center justify-between w-full mb-2">
-                            <img
-                                src="https://i.pravatar.cc/40?u=1"
-                                alt="User avatar"
-                                class="w-10 h-10 rounded-full"
-                            />
-                            
-                            <div class="flex space-x-1 text-gray-400">
-                                <button type="submit"><x-heroicon-s-trash class="h-5 w-5 text-gray-400 cursor-pointer transition-colors hover:text-red-500" /></button>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <h3 class="font-semibold text-sm">{{$comment->users->name}}</h3>
-                            <span class="flex gap-1 items-center text-sm">
-                                <x-zondicon-time class="h-2" />
-                                {{ date('M d, Y', strtotime($comment->created_at)) }}
-                            </span> 
-                        </div>
-                        <p class="mt-1 text-gray-700 text-sm">
-                            {{$comment->comment_context}}
-                        </p>
-                    </form>  
-                @else
-    
-                @endif
-            @endforeach
-
-            <hr class="mb-10">
             
-            @foreach ($comments as $comment)
-                @if (auth()->user()->id != $comment->user_id)
+
+            {{-- Display my own comments first --}}
+            @foreach ($myComments as $comment)
                 <div class="mb-10">
-                    <img
-                        src="https://i.pravatar.cc/40?u=1"
-                        alt="User avatar"
-                        class="w-10 h-10 rounded-full mb-2"
-                    />
+                    <div class="flex items-center justify-between w-full mb-2">
+                        <img
+                            src="https://i.pravatar.cc/40?u=1"
+                            alt="User avatar"
+                            class="w-10 h-10 rounded-full"
+                        />
+                        
+                        <div class="flex space-x-1 text-gray-400">
+                            <form action="{{ route('comments.destroy', $comment->id) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"><x-heroicon-s-trash class="h-5 w-5 text-gray-400 cursor-pointer transition-colors hover:text-red-500" /></button>
+                            </form>
+                            
+                            <button type="submit" title="Edit Comment" id="initiate-edit-comment-{{ $comment->id }}">
+                                <x-heroicon-s-cog class="h-5 w-5 text-gray-400 cursor-pointer transition-colors hover:text-blue-500"/>
+                            </button>
+                        </div>
+                    </div>
                     <div class="flex justify-between items-center">
-                        <h3 class="font-semibold text-sm">{{$comment->users->name}}</h3>
+                        <h3 class="font-semibold text-sm">{{ $comment->users->name }}</h3>
                         <span class="flex gap-1 items-center text-sm">
                             <svg class="h-2 w-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             {{ date('M d, Y', strtotime($comment->created_at)) }}
-                        </span> 
+                        </span>
                     </div>
-                    <p class="mt-1 text-gray-700 text-sm">
-                        {{$comment->comment_context}}
-                    </p>
+
+                    <div id="comment-{{ $comment->id }}">
+                        <div class="mt-1 text-gray-700 text-sm">
+                            <p>{{ $comment->comment_context }}</p>
+                        </div>
+                        {{-- Update Comment Form --}}
+                        <form action="{{ route('comments.update', $comment->id) }}" method="POST" class="hidden | columns-1">
+                            @csrf
+                            @method('PUT')
+                            <textarea
+                                name="updated_comment_context"
+                                placeholder="Write your comment here..."
+                                class="w-full h-28 p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required
+                            >{{$comment->comment_context}}</textarea>
+                            <div class="flex justify-end">
+                                <button type="submit" class="px-4 py-2 bg-green-800 text-white rounded-2xl transition cursor-pointer">
+                                    Update Comment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                                    
+                    {{-- Reply button for my comments --}}
+                    <div class="">
+                        <form action="{{ route('comments.reply') }}" method="POST" class="flex justify-end mt-2">
+                            @csrf
+                            <input type="hidden" name="target_comment_id border border-black" value="{{ $comment->id }}">
+                            <textarea name="comment_context" required class="w-full border border-black"></textarea>
+                            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                Add a reply to this comment
+                            </button>
+                        </form>
+                    </div>
                 </div>
-                @endif
             @endforeach
 
-            @if ($comments->isEmpty())
+            <div class="flex items-center my-10">
+                <hr class="flex-grow border-t border-gray-300" />
+                <span class="px-4 text-gray-500 text-sm">Below are other's Comments</span>
+                <hr class="flex-grow border-t border-gray-300" />
+            </div>
+
+
+            {{-- Display other users' comments --}}
+            @foreach ($othersComments as $comment)
+                <div class="mb-10">
+                    <img
+                        src="https://i.pravatar.cc/40?u={{ $comment->user_id }}"
+                        alt="User avatar"
+                        class="w-10 h-10 rounded-full mb-2"
+                    />
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-semibold text-sm">{{ $comment->users->name }}</h3>
+                        <span class="flex gap-1 items-center text-sm">
+                            <svg class="h-2 w-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            {{ date('M d, Y', strtotime($comment->created_at)) }}
+                        </span>
+                    </div>
+                    <p class="mt-1 text-gray-700 text-sm">
+                        {{ $comment->comment_context }}
+                    </p>
+
+                    {{-- Reply button --}}
+                    <form action="{{ route('comments.reply') }}" method="POST" class="flex justify-end mt-2">
+                        @csrf
+                        <input type="hidden" name="target_comment_id" value="{{ $comment->id }}">
+                        <textarea name="comment_context" required class="w-full border border-black"></textarea>
+                        <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Add a reply to this comment
+                        </button>
+                    </form>
+                </div>
+            @endforeach
+
+            @if ($othersComments->isEmpty() && $myComments->isEmpty())
                 <div class="flex justify-center items-center py-10">
                     <span class="text-lg text-gray-500">There are no comments yet...</span>
                 </div>
@@ -195,4 +241,10 @@
     @endforeach
 </div>
 
+
+
+
+
 @endsection
+
+

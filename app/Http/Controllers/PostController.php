@@ -191,10 +191,14 @@ class PostController extends Controller
         $user_id = Auth::id();
         $user_object = User::find($user_id); // returns the User model or null
 
+        $myComments = $comments->where('user_id', $user_id);
+        $othersComments = $comments->where('user_id', '!=', $user_id);
+
         // Step 4: Return view
         return view('posts.show', [
             'post' => $post,
-            'comments' => $comments,
+            'myComments' => $myComments,
+            'othersComments' => $othersComments,
             'others' => $others,
             'user_object_of_the_one_looking_at_this_page' => $user_object,
         ]);
@@ -465,6 +469,8 @@ class PostController extends Controller
 
 
     ////// My other FUNCTIONS (not part of CRUD):
+
+
 
     protected function isValidImageLink(?string $url): bool
     {

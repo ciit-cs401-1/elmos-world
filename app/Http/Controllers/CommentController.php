@@ -36,7 +36,7 @@ class CommentController extends Controller
         Log::info("Comment.store - \$request values", $request->all());
 
         // Step 1: Validate request data
-        $validated_request_items = $request->validate([
+        $validated_requests = $request->validate([
             'post_id' => 'required|integer|exists:posts,id',
             'comment_context' => 'required|string|max:1000',
         ]);
@@ -50,12 +50,12 @@ class CommentController extends Controller
 
         // Step 3: Create a new Comment instance
         $comment = new Comment();
-        $comment->comment_context = $validated_request_items["comment_context"];
+        $comment->comment_context = $validated_requests["comment_context"];
         $comment->reviewer_name = $user->name;
         $comment->reviewer_email = $user->email;
         $comment->user_id = $user->id;
         $comment->created_at = now();
-        $comment->post_id = $validated_request_items["post_id"];
+        $comment->post_id = $validated_requests["post_id"];
 
         $comment->is_hidden = false; // or default to your model's value
         $comment->updated_at = null; // optional, usually auto-managed
@@ -87,20 +87,47 @@ class CommentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        Log::info("Comment.store - Comment Update function START");
-
-
-
-
-        Log::info("Comment.store - Comment Update function END");
-    }
+    public function edit(string $id) {}
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id) {}
+    public function update(Request $request, string $id)
+    {
+        Log::info("Comment.store - Comment Update function START");
+
+        Log::info("What's the comment id?: $id");
+
+        // Step 1: Validating Inputs
+        $validated_requests = $request->validate([
+            "updated_comment_context" => 'required|string|max:1000',
+        ]);
+
+        // Step 2: Query the comment
+        $comment = Comment::where('id', $id)->first();
+
+        // Step 3: Check if user is allowed to edit this comment.
+        $user_id_of_the_one_looking_at_this_page = Auth::id();
+        $user_owns_this_comment = $user_id_of_the_one_looking_at_this_page == $comment->user_id;
+        Log::info("comment.update - Does user own this comment? $user_owns_this_comment");
+
+        if ($user_owns_this_comment) {
+            // Step 1: userverified = now update the comment and save it
+            Log::info("comment.update - going to update the comment");
+
+            $comment->comment_context = $validated_requests["updated_comment_context"];
+            $comment->updated_at = now();
+            Log::info("comment.update - updating comment context");
+            $comment->save();
+        } else {
+            Log::info("ERROR: User doesn't own this comment");
+            abort(403, 'Unauthorized action.'); // Or redirect with an error
+            return;
+        }
+
+        Log::info("Comment.store - Comment Update function END");
+        return redirect()->back()->with('success', 'Comment is updated!');
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -127,5 +154,30 @@ class CommentController extends Controller
         $comment_object->delete();
         Log::info("Comment.destroy - Comment $id was deleted. Function END");
         return redirect()->back()->with('success', 'Comment is GONE!');
+    }
+
+    /////////// (Other Functions not part of CRUD)
+
+    public function replyToComment(Request $request)
+    {
+        Log::info("replyToComment - replying to comment START");
+
+        // Step 1: Validate the values & Validate if user is authenticated
+        $validated_requests = $request->validate([
+            'target_comment_id' => 'required|integer|exists:comments,id',
+            'comment_context' => 'required|string|max:1000',
+        ]);
+        $user = Auth::user();
+
+        if (!$user) {
+            Log::warning("replyToComment - Unauthenticated user tried to reply.");
+            return redirect()->back()->withErrors('You must be logged in to reply.');
+        }
+
+        // Step 2: 
+
+
+        Log::info("replyToComment - replying to comment END");
+        return redirect()->back()->with('success', 'Reply posted!');
     }
 }
