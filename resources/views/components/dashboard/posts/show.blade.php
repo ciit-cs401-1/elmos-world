@@ -1,6 +1,12 @@
 @extends('layouts.dashboard')
     
 @section('content')
+
+<head>
+    {{-- My Scripts for this view --}}
+    @vite('resources/js/michael_edit_comment.js') 
+    @vite('resources/js/append_subcomment.js') 
+</head>
             
 <a class="flex items-center gap-2 px-15 mb-10 mt-5 text-green-800 cursor-pointer" href="{{route('dashboard.posts')}}"><x-ri-arrow-left-long-line class="h-5"/>Back</a>
 
@@ -77,31 +83,47 @@
 </div>
 
 <div class="px-15 mb-10 mt-10 max-w-2xl mx-auto space-y-8">
+
+    <!-- 💬 Comment Form -->
+    <form action="{{ route('comments.store') }}" method="POST">
+        @csrf
+        <div class="space-y-3">
+            {{-- Get the user's content and leave --}}
+            <h2 class="text-xl font-semibold">Leave a Comment</h2>
+            <input type="hidden" name="post_id" value="{{ $post->id }}">
+            <textarea
+                name="comment_context"
+                placeholder="Write your comment here..."
+                class="w-full h-28 p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+            ></textarea>
+            <div class="flex justify-end">
+                <button type="submit" class="px-4 py-2 bg-green-800 text-white rounded-2xl transition cursor-pointer">
+                    Post Comment
+                </button>
+            </div>
+        </div>
+    </form>
+
     
-    <h2 class="text-xl font-semibold">Comments</h2>
+
+    <!-- The Comment Section  -->
     <div class="flex gap-4">
-        <div class="flex-1">            
+        <div class="flex-1">
+
+            {{-- Display my own comments first --}}
             @foreach ($comments as $comment)
-                @if (auth()->user()->id != $comment->user_id)
-                <div class="mb-10">
-                    <img
-                        src="https://i.pravatar.cc/40?u=1"
-                        alt="User avatar"
-                        class="w-10 h-10 rounded-full mb-2"
-                    />
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-semibold text-sm">{{$comment->users->name}}</h3>
-                        <span class="flex gap-1 items-center text-sm">
-                            <svg class="h-2 w-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            {{ date('M d, Y', strtotime($comment->created_at)) }}
-                        </span> 
-                    </div>
-                    <p class="mt-1 text-gray-700 text-sm">
-                        {{$comment->comment_context}}
-                    </p>
-                </div>
+                @if(($comment->user_id === $user_object_of_the_one_looking_at_this_page->id) && ($comment->is_comment_a_subcomment === 0))
+                    @include('template.comment', [ "current_comment" => $comment])
+                @endif
+            @endforeach
+
+            <hr class="flex-grow border-t border-gray-300" />
+
+            {{-- OTHER's comments --}}
+            @foreach ($comments as $comment)
+                @if(($comment->user_id !== $user_object_of_the_one_looking_at_this_page->id) && ($comment->is_comment_a_subcomment === 0))
+                    @include('template.comment', [ "current_comment" => $comment])
                 @endif
             @endforeach
 
@@ -113,6 +135,19 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    function toggleReplyForm(id) {
+        const form = document.getElementById(`reply-form-${id}`);
+        form.classList.toggle('hidden');
+    }
+
+    function toggleEditForm(id) {
+        const form = document.getElementById(`edit-form-${id}`);
+        form.classList.toggle('hidden');
+    }
+</script>
 
 
 @endsection
