@@ -201,6 +201,7 @@ class CommentController extends Controller
             $comment->reviewer_email = $reviewer_name;
             $comment->user_id = $user->id;
             // set the other necessary details
+            $comment->created_at = now();
             $comment->comment_context = $validated_requests["comment_context"];
             $comment->under_what_comment_id_is_this_comment = $validated_requests["under_what_comment_id"];
             $comment->post_id = $validated_requests["inside_what_post_id"];

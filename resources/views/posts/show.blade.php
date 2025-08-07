@@ -101,12 +101,7 @@
                 @endif
             @endforeach
 
-            <div class="flex items-center my-10">
-                <hr class="flex-grow border-t border-gray-300" />
-                <span class="px-4 text-gray-500 text-sm">Below are other's Comments</span>
-                <hr class="flex-grow border-t border-gray-300" />
-            </div>
-
+            <hr class="flex-grow border-t border-gray-300" />
 
             {{-- OTHER's comments --}}
             @foreach ($comments as $comment)
