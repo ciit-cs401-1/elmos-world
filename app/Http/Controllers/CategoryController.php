@@ -87,7 +87,7 @@ class CategoryController extends Controller
                 ->with('success', 'Category deleted successfully');
         } catch (Exception $e) {
             if ($e->getCode() == '23000') {
-                return redirect()->route('categories.index')->with('error', 'Category is linked some posts.');
+                return redirect()->route('categories.index')->with('error', 'Category is linked to some posts.');
             }
             throw $e;
         }

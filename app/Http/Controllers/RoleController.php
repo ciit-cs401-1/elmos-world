@@ -93,6 +93,9 @@ class RoleController extends Controller
                 ->route('roles.index')
                 ->with('success', 'Role deleted successfully');
         } catch (Exception $e) {
+            if ($e->getCode() == '23000') {
+                return redirect()->route('roles.index')->with('error', 'Role is linked to some users.');
+            }
             throw $e;
         }
     }
