@@ -12,6 +12,16 @@ class Media extends Model
 
     public $timestamps = false;
 
+    protected $fillable = [
+        'url',
+        'file_name',
+        'file_type',
+        'upload_date',
+        'description',
+        'post_id',
+        'file_size',
+    ];
+
     public function post(): BelongsTo
     {
         return $this->belongsTo(Post::class);

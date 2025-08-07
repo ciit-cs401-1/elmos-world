@@ -59,7 +59,7 @@
             </span>
         @endforeach
     </div>
-    <div class="rounded-2xl h-90 mb-10 bg-cover bg-center" style="background-image: url('{{ $post->media->first()?->url }}')"></div>
+    <div class="rounded-2xl h-90 mb-10 bg-cover bg-center" style="background-image: url('{{ $post->media->first()->url }}')"></div>
     <div class="leading-7">
     {{$post->content}}
     </div>
@@ -158,11 +158,6 @@
         form.classList.toggle('hidden');
     }
 </script>
-
-
-
-
-
 
 @endsection
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Media;
 use App\Models\User;
 use App\Models\Tag;
 
@@ -89,13 +90,6 @@ class PostController extends Controller
             'post_tags' => 'nullable|array',
         ]);
 
-        // 1: Reject bad image links
-        $is_image_link_valid = $this->isValidImageLink($validated_request_items["post_image"]);
-        if ($is_image_link_valid == false) {
-            Log::error("Post.store - image url must be valid or from unsplash");
-            return back()->withErrors(['post_image' => 'The image URL must be a valid image or an Unsplash link.'])->withInput();
-        }
-
         // Step 2: Slug (must be unique) Generator - then create the unique slug
         $tempSlug = Str::slug($validated_request_items['post_title']);
         $newSlug = $this->make_slug_unique_from_db_post($tempSlug);
@@ -129,13 +123,14 @@ class PostController extends Controller
         $post->title = $validated_request_items['post_title'];
         $post->slug = $newSlug;
         $post->status = 'D'; // D - Draft
+        $post->featured_image_url = "https://picsum.photos/200/300";
         $post->content = $validated_request_items['post_content'];
-        $post->featured_image_url = $validated_request_items['post_image'] ?? "";
         $post->last_modified_date = now();
         $post->user_id = $user_id;
 
         try {
             $is_post_successful = $post->save();
+
             if ($is_post_successful) {
 
                 Log::info("Post.store - Post successfully published and saved to DB");
@@ -159,6 +154,17 @@ class PostController extends Controller
 
                     $post->tags()->sync($tagIds);
                 }
+
+                $media = new Media([
+                    'url'         => $validated_request_items['post_image'] ?? null,
+                    'file_name'   => fake()->title(),
+                    'file_type'   => '.jpg',
+                    'upload_date' => now(),
+                    'description' => fake()->paragraph(),
+                    'post_id'     => $post->id,
+                ]);
+
+                $media->save();
             } else {
                 Log::warning("Post.store - Post.save() returned false");
                 return redirect()->back()->with('success', 'Post stored successfully!');
@@ -332,7 +338,20 @@ class PostController extends Controller
                 Log::info("Post.update: Is post_content changed", ['changed' => $is_post_content_changed]);
                 $is_new_image_url_valid_link = $this->isValidImageLink($validated_request_items["post_image"]);
                 Log::info("Post.update: Is valid image url link", [$is_new_image_url_valid_link]);
-                $new_image_url_link = $validated_request_items["post_image"] ?? "";
+
+
+                $new_image_url_link = $post->media()->first();
+
+                if ($new_image_url_link) {
+                    $new_image_url_link->update([
+                        'url'         => $validated_request_items['post_image'] ?? $media->url,
+                        'file_name'   => fake()->title(),
+                        'file_type'   => '.jpg',
+                        'upload_date' => now(),
+                        'description' => fake()->paragraph(),
+                    ]);
+                }
+
                 Log::info("Post.update: old_image_url_link: ", [$post->featured_image_url]);
                 Log::info("Post.update: new_image_url_link: ", [$new_image_url_link]);
                 $is_post_featured_image_url_changed = ($post->featured_image_url ?? "") !== ($validated_request_items["post_image"] ?? "");
@@ -486,7 +505,7 @@ class PostController extends Controller
         }
 
         // Step 3: If failed, check which host it come from. - unsplash most trusted
-        $trustedHosts = ['images.unsplash.com', 'plus.unsplash.com'];
+        $trustedHosts = ['images.unsplash.com', 'plus.unsplash.com', ''];
         if (in_array($host, $trustedHosts)) {
             return true;
         }
